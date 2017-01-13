@@ -13,8 +13,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.wordpress.android.fluxc.Dispatcher;
+import org.wordpress.android.fluxc.store.AccountStore;
+import org.wordpress.android.fluxc.store.SiteStore;
+
+import javax.inject.Inject;
+
 public class LoginActivity extends Activity {
-    // UI references.
+    // UI references
     private TextView mHelpView;
     private AutoCompleteTextView mUrlView;
     private AutoCompleteTextView mEmailView;
@@ -27,9 +33,24 @@ public class LoginActivity extends Activity {
     private boolean mUrlValidated;
     private boolean mUrlIsWPCom;
 
+    // FluxC
+    @Inject Dispatcher mDispatcher;
+    @Inject AccountStore mAccountStore;
+    @Inject SiteStore mSiteStore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Inject stuff
+        ((PioupiouApp) getApplication()).component().inject(this);
+
+        // If the user has an access token or a self hosted site, we consider they're logged in.
+        if (mAccountStore.hasAccessToken() || mSiteStore.hasSelfHostedSite()) {
+            // TODO: Start the "Post list activity"
+            finish();
+        }
+
+        // Init the layout and UI references
         setContentView(R.layout.activity_login);
 
         mUrlView = (AutoCompleteTextView) findViewById(R.id.url);
@@ -89,7 +110,7 @@ public class LoginActivity extends Activity {
     }
 
     private void attemptLogin() {
-        // TODO: Have fun here
+        // TODO: insert cool stuff here
     }
 
     private void checkURLField() {
@@ -130,5 +151,9 @@ public class LoginActivity extends Activity {
             }
         });
     }
+
+    // FluxC Events
+
+    // TODO: insert cool stuff here
 }
 

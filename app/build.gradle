@@ -30,6 +30,7 @@ dependencies {
     // Libraries
     compile 'com.google.dagger:dagger:2.0.2'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile "com.jakewharton.timber:timber:3.1.0"
     provided 'org.glassfish:javax.annotation:10.0-b28'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.0.2'
 
