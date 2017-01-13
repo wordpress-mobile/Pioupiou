@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Pioupiou</string>
+
+    <!-- Strings related to login -->
+
+    <string name="login_title">Pioupiou</string>
+    <string name="login_help_url">What\'s your site address (also called site URL)? It should be something like:\n  - ponyexpress.com\n  - ponyexpress.wordpress.com\n  - http://www.ponyexpre.ss</string>
+    <string name="login_help_username_and_password">Enter your username (or email address) and password</string>
+    <string name="prompt_url">Site Address (URL)</string>
+    <string name="prompt_email">Username or email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_next">Next</string>
+    <string name="action_login">Log in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email completions."</string>
+</resources>
