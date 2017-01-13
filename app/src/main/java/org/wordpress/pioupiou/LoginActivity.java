@@ -23,6 +23,8 @@ import org.wordpress.android.fluxc.store.SiteStore.OnURLChecked;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 public class LoginActivity extends Activity {
     // UI references
     private TextView mHelpView;
@@ -36,6 +38,7 @@ public class LoginActivity extends Activity {
     // State
     private boolean mUrlValidated;
     private boolean mUrlIsWPCom;
+    private String mUrl;
 
     // FluxC
     @Inject Dispatcher mDispatcher;
@@ -122,8 +125,10 @@ public class LoginActivity extends Activity {
 
     private void attemptLogin() {
         if (mUrlIsWPCom) {
+            Timber.i("Start login process using WPCOM REST API on: " + mUrl);
             // WordPress.com login
         } else {
+            Timber.i("Start login process using XMLRPC API on: " + mUrl);
             // Self Hosted login
         }
         // TODO: insert cool stuff here
@@ -135,6 +140,7 @@ public class LoginActivity extends Activity {
             mUrlView.setError(getText(R.string.error_invalid_url));
             return;
         }
+        Timber.i("Start URL check on: " + url);
         mUrlView.setEnabled(false);
         setProgressVisible(true);
         mDispatcher.dispatch(SiteActionBuilder.newIsWpcomUrlAction(url));
@@ -174,8 +180,10 @@ public class LoginActivity extends Activity {
         if (event.isError()) {
             mUrlView.setError(getText(R.string.error_invalid_url));
         } else {
+            mUrl = event.url;
             mUrlIsWPCom = event.isWPCom;
             mUrlValidated = true;
+            Timber.i("Found a " + (mUrlIsWPCom ? "WPCom" : "Self Hosted or non WordPress") + " site on: " + mUrl);
             setEmailPasswordFieldsVisible(true);
             // TODO: Trigger the discovery process here (if not mUrlIsWPCom, we want to make sure it's a self hosted
             // site and not a random site.
