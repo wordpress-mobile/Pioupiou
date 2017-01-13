@@ -1,21 +1,25 @@
 package org.wordpress.pioupiou;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.wordpress.android.fluxc.Dispatcher;
+import org.wordpress.android.fluxc.generated.SiteActionBuilder;
 import org.wordpress.android.fluxc.store.AccountStore;
 import org.wordpress.android.fluxc.store.SiteStore;
+import org.wordpress.android.fluxc.store.SiteStore.OnURLChecked;
 
 import javax.inject.Inject;
 
@@ -27,7 +31,7 @@ public class LoginActivity extends Activity {
     private EditText mPasswordView;
     private Button mLogInButton;
     private View mProgressView;
-    private View mLoginFormView;
+    private View mImageEggView;
 
     // State
     private boolean mUrlValidated;
@@ -90,8 +94,8 @@ public class LoginActivity extends Activity {
             }
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+        mImageEggView = findViewById(R.id.image_egg);
     }
 
     @Override
@@ -104,24 +108,39 @@ public class LoginActivity extends Activity {
         }
     }
 
-    private boolean isWPComUrl(String url) {
-        // TODO: check for ".wordpress.com" and then ask FluxC discovery?
-        return true;
+    @Override
+    public void onStart() {
+        super.onStart();
+        mDispatcher.register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mDispatcher.unregister(this);
     }
 
     private void attemptLogin() {
+        if (mUrlIsWPCom) {
+            // WordPress.com login
+        } else {
+            // Self Hosted login
+        }
         // TODO: insert cool stuff here
     }
 
     private void checkURLField() {
+        String url = mUrlView.getText().toString();
+        if (!Patterns.WEB_URL.matcher(url).matches()) {
+            mUrlView.setError(getText(R.string.error_invalid_url));
+            return;
+        }
+        mUrlView.setEnabled(false);
         setProgressVisible(true);
-        mUrlIsWPCom = isWPComUrl(mUrlView.getText().toString());
-        mUrlValidated = true;
-        setProgressVisible(false);
-        setEmailPasswordFieldsVisible(true);
+        mDispatcher.dispatch(SiteActionBuilder.newIsWpcomUrlAction(url));
     }
 
-    // I hate fragments
+    // I hate fragments but we should use them instead of doing that (to get better animations at least)
     private void setEmailPasswordFieldsVisible(boolean visible) {
         mEmailView.setVisibility(visible ? View.VISIBLE : View.GONE);
         mPasswordView.setVisibility(visible ? View.VISIBLE : View.GONE);
@@ -131,28 +150,37 @@ public class LoginActivity extends Activity {
     }
 
     private void setProgressVisible(final boolean visible) {
-        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-        mLoginFormView.setVisibility(visible ? View.GONE : View.VISIBLE);
-        mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                visible ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mLoginFormView.setVisibility(visible ? View.GONE : View.VISIBLE);
-            }
-        });
-
-        mProgressView.setVisibility(visible ? View.VISIBLE : View.GONE);
-        mProgressView.animate().setDuration(shortAnimTime).alpha(
-                visible ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mProgressView.setVisibility(visible ? View.VISIBLE : View.GONE);
-            }
-        });
+        // TODO: do we need a progress bar when we have a rotating egg?
+        // mProgressView.setVisibility(visible ? View.VISIBLE : View.GONE);
+        if (visible) {
+            mImageEggView.animate().setDuration(30000).rotationBy(30 * 360f)
+                    .setInterpolator(new LinearInterpolator()).start();
+            mLogInButton.setEnabled(false);
+            mLogInButton.setAlpha(0.5f);
+        } else {
+            mImageEggView.animate().cancel();
+            mLogInButton.setEnabled(true);
+            mLogInButton.setAlpha(1f);
+        }
     }
 
     // FluxC Events
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onUrlChecked(OnURLChecked event) {
+        mUrlView.setEnabled(true);
+        setProgressVisible(false);
+
+        if (event.isError()) {
+            mUrlView.setError(getText(R.string.error_invalid_url));
+        } else {
+            mUrlIsWPCom = event.isWPCom;
+            mUrlValidated = true;
+            setEmailPasswordFieldsVisible(true);
+            // TODO: Trigger the discovery process here (if not mUrlIsWPCom, we want to make sure it's a self hosted
+            // site and not a random site.
+        }
+    }
 
     // TODO: insert cool stuff here
 }
