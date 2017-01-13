@@ -1,6 +1,6 @@
 # Pioupiou
 
-Micro blogging app using your WordPress site.
+Micro blogging app using your WordPress site as backend.
 
 # Build
 
