@@ -11,7 +11,6 @@ import org.wordpress.pioupiou.postlist.DummyContent.PostItem;
 import org.wordpress.pioupiou.postlist.PostFragment.OnListFragmentInteractionListener;
 
 public class PostListActivity extends AppCompatActivity implements OnListFragmentInteractionListener {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
