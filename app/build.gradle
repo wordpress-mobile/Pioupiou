@@ -26,16 +26,18 @@ dependencies {
     // Support
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.android.support:design:25.1.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta1'
 
     // Libraries
     compile 'com.google.dagger:dagger:2.0.2'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile "com.jakewharton.timber:timber:3.1.0"
-    provided 'org.glassfish:javax.annotation:10.0-b28'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.0.2'
+    compile 'com.jakewharton.timber:timber:3.1.0'
+    compile 'org.wordpress:persistentedittext:1.+'
 
     // FluxC (from Jitpack)
     compile ('com.github.wordpress-mobile.WordPress-FluxC-Android:fluxc:develop-SNAPSHOT') {
-        exclude group:'com.android.support'
+        exclude group :'com.android.support'
     }
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.0.2'
+    provided 'org.glassfish:javax.annotation:10.0-b28'
 }

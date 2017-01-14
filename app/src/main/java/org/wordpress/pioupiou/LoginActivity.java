@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -28,9 +27,10 @@ import timber.log.Timber;
 public class LoginActivity extends Activity {
     // UI references
     private TextView mHelpView;
-    private AutoCompleteTextView mUrlView;
-    private AutoCompleteTextView mEmailView;
+    private EditText mUrlView;
+    private EditText mEmailView;
     private EditText mPasswordView;
+    private Button mNextButton;
     private Button mLogInButton;
     private View mImageEggView;
 
@@ -58,9 +58,13 @@ public class LoginActivity extends Activity {
 
         // Init the layout and UI references
         setContentView(R.layout.activity_login);
-
-        mUrlView = (AutoCompleteTextView) findViewById(R.id.url);
         mHelpView = (TextView) findViewById(R.id.login_help);
+        mImageEggView = findViewById(R.id.image_egg);
+        getFragmentManager().beginTransaction().add(R.id.fragment_container, new URLCheckFragment()).commit();
+    }
+
+    public void bindUrlFragmentReferences(View view) {
+        mUrlView = (EditText) view.findViewById(R.id.url);
         mUrlView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -71,8 +75,19 @@ public class LoginActivity extends Activity {
                 return false;
             }
         });
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        mPasswordView = (EditText) findViewById(R.id.password);
+
+        mNextButton = (Button) view.findViewById(R.id.login_button);
+        mNextButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    checkURLField();
+            }
+        });
+    }
+
+    public void bindEmailPasswordFragmentReferences(View view) {
+        mEmailView = (EditText) view.findViewById(R.id.email);
+        mPasswordView = (EditText) view.findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -84,28 +99,13 @@ public class LoginActivity extends Activity {
             }
         });
 
-        mLogInButton = (Button) findViewById(R.id.login_button);
+        mLogInButton = (Button) view.findViewById(R.id.login_button);
         mLogInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mUrlValidated) {
-                    attemptLogin();
-                } else {
-                    checkURLField();
-                }
+                attemptLogin();
             }
         });
-        mImageEggView = findViewById(R.id.image_egg);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mUrlValidated) {
-            mUrlValidated = false;
-            setEmailPasswordFieldsVisible(false);
-        } else {
-            super.onBackPressed();
-        }
     }
 
     @Override
@@ -144,27 +144,30 @@ public class LoginActivity extends Activity {
         mDispatcher.dispatch(SiteActionBuilder.newIsWpcomUrlAction(url));
     }
 
-    // I hate fragments but we should use them instead of doing that (to get better animations at least)
     private void setEmailPasswordFieldsVisible(boolean visible) {
-        mEmailView.setVisibility(visible ? View.VISIBLE : View.GONE);
-        mPasswordView.setVisibility(visible ? View.VISIBLE : View.GONE);
-        mUrlView.setVisibility(visible ? View.GONE : View.VISIBLE);
-        mLogInButton.setText(visible ? R.string.action_login : R.string.action_next);
-        mHelpView.setText(visible ? R.string.login_help_username_and_password : R.string.login_help_url);
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out,
+                        android.R.animator.fade_in, android.R.animator.fade_out)
+                .replace(R.id.fragment_container, new EmailPasswordFragment()).addToBackStack(null).commit();
     }
 
-    private void setProgressVisible(final boolean visible) {
+    private void setButtonEnabled(Button button, boolean enabled) {
+        if (button != null) {
+            button.setEnabled(enabled);
+            button.setAlpha(enabled ? 1f : 0.5f);
+        }
+    }
+
+    private void setProgressVisible(boolean visible) {
         // We don't need a progress bar when we have a rotating egg.
         if (visible) {
             mImageEggView.animate().setDuration(60000).rotationBy(60 * 360f)
                     .setInterpolator(new LinearInterpolator()).start();
-            mLogInButton.setEnabled(false);
-            mLogInButton.setAlpha(0.5f);
         } else {
             mImageEggView.animate().cancel();
-            mLogInButton.setEnabled(true);
-            mLogInButton.setAlpha(1f);
         }
+        setButtonEnabled(mLogInButton, !visible);
+        setButtonEnabled(mNextButton, !visible);
     }
 
     // FluxC Events
