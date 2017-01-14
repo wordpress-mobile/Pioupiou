@@ -1,10 +1,12 @@
-package org.wordpress.pioupiou;
+package org.wordpress.pioupiou.login;
 
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import org.wordpress.pioupiou.R;
 
 public class URLCheckFragment extends Fragment {
     @Override

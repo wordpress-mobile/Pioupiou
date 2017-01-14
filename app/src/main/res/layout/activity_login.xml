@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context="org.wordpress.pioupiou.LoginActivity">
+    tools:context="org.wordpress.pioupiou.login.LoginActivity">
 
     <LinearLayout
         android:id="@+id/email_login_form"

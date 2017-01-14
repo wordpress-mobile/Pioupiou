@@ -1,4 +1,4 @@
-package org.wordpress.pioupiou;
+package org.wordpress.pioupiou.misc;
 
 import android.app.Application;
 

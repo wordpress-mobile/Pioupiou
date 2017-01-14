@@ -1,6 +1,7 @@
-package org.wordpress.pioupiou;
+package org.wordpress.pioupiou.login;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -19,6 +20,9 @@ import org.wordpress.android.fluxc.generated.SiteActionBuilder;
 import org.wordpress.android.fluxc.store.AccountStore;
 import org.wordpress.android.fluxc.store.SiteStore;
 import org.wordpress.android.fluxc.store.SiteStore.OnURLChecked;
+import org.wordpress.pioupiou.misc.PioupiouApp;
+import org.wordpress.pioupiou.postlist.PostListActivity;
+import org.wordpress.pioupiou.R;
 
 import javax.inject.Inject;
 
@@ -130,6 +134,8 @@ public class LoginActivity extends Activity {
             // Self Hosted login
             // TODO: insert cool stuff here
         }
+        startActivity(new Intent(this, PostListActivity.class));
+        finish();
     }
 
     private void checkURLField() {
@@ -172,6 +178,7 @@ public class LoginActivity extends Activity {
 
     // FluxC Events
 
+    @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUrlChecked(OnURLChecked event) {
         mUrlView.setEnabled(true);
