@@ -51,13 +51,12 @@ public class LoginActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Inject stuff
+        // Injection
         ((PioupiouApp) getApplication()).component().inject(this);
 
         // If the user has an access token or a self hosted site, we consider they're logged in.
         if (mAccountStore.hasAccessToken() || mSiteStore.hasSelfHostedSite()) {
-            // TODO: Start the "Post list activity"
-            finish();
+            showPostListAndFinish();
         }
 
         // Init the layout and UI references
@@ -134,6 +133,10 @@ public class LoginActivity extends Activity {
             // Self Hosted login
             // TODO: insert cool stuff here
         }
+        showPostListAndFinish();
+    }
+
+    private void showPostListAndFinish() {
         startActivity(new Intent(this, PostListActivity.class));
         finish();
     }
