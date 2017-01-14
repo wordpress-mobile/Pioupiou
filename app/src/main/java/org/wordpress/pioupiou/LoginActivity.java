@@ -32,7 +32,6 @@ public class LoginActivity extends Activity {
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private Button mLogInButton;
-    private View mProgressView;
     private View mImageEggView;
 
     // State
@@ -96,8 +95,6 @@ public class LoginActivity extends Activity {
                 }
             }
         });
-
-        mProgressView = findViewById(R.id.login_progress);
         mImageEggView = findViewById(R.id.image_egg);
     }
 
@@ -127,11 +124,12 @@ public class LoginActivity extends Activity {
         if (mUrlIsWPCom) {
             Timber.i("Start login process using WPCOM REST API on: " + mUrl);
             // WordPress.com login
+            // TODO: insert cool stuff here
         } else {
             Timber.i("Start login process using XMLRPC API on: " + mUrl);
             // Self Hosted login
+            // TODO: insert cool stuff here
         }
-        // TODO: insert cool stuff here
     }
 
     private void checkURLField() {
@@ -156,10 +154,9 @@ public class LoginActivity extends Activity {
     }
 
     private void setProgressVisible(final boolean visible) {
-        // TODO: do we need a progress bar when we have a rotating egg?
-        // mProgressView.setVisibility(visible ? View.VISIBLE : View.GONE);
+        // We don't need a progress bar when we have a rotating egg.
         if (visible) {
-            mImageEggView.animate().setDuration(30000).rotationBy(30 * 360f)
+            mImageEggView.animate().setDuration(60000).rotationBy(60 * 360f)
                     .setInterpolator(new LinearInterpolator()).start();
             mLogInButton.setEnabled(false);
             mLogInButton.setAlpha(0.5f);
