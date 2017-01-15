@@ -21,4 +21,7 @@
     <string name="text_separator" translatable="false">\u00A0–\u00A0</string>
     <string name="action_add">Create new micro post</string>
 
+    <!-- New post -->
+    <string name="prompt_new_post">What\'s on your mind?</string>
+
 </resources>

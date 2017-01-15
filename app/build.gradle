@@ -5,11 +5,12 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "org.wordpress.pioupiou"
-        minSdkVersion 14
+        minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
@@ -37,4 +38,5 @@ dependencies {
     compile 'org.wordpress:persistentedittext:1.0.2'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.0.2'
     provided 'org.glassfish:javax.annotation:10.0-b28'
+    compile 'com.fenchtose:tooltip:0.1.5'
 }

@@ -1,6 +1,6 @@
 <resources>
 
-    <style name="WordPress" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="WordPress" parent="Base.Theme.AppCompat.Light.DarkActionBar">
         <!-- Material theme -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
