@@ -17,10 +17,15 @@ import android.widget.ImageView;
 import com.fenchtose.tooltip.Tooltip;
 import com.fenchtose.tooltip.Tooltip.Listener;
 
+import org.wordpress.android.fluxc.store.PostStore;
+import org.wordpress.android.fluxc.store.SiteStore;
 import org.wordpress.persistentedittext.PersistentEditText;
 import org.wordpress.pioupiou.R;
+import org.wordpress.pioupiou.misc.PioupiouApp;
 import org.wordpress.pioupiou.postlist.DummyContent.PostItem;
 import org.wordpress.pioupiou.postlist.PostFragment.OnListFragmentInteractionListener;
+
+import javax.inject.Inject;
 
 import timber.log.Timber;
 
@@ -32,11 +37,14 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     boolean mNewPostVisible;
 
     // FluxC
-    // TODO: Inject stores here
+    @Inject PostStore mPostStore;
+    @Inject SiteStore mSiteStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((PioupiouApp) getApplication()).component().inject(this);
+
         setContentView(R.layout.activity_post_list);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_to_refresh);
