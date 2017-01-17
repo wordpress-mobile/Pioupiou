@@ -16,13 +16,18 @@ import android.widget.TextView;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.wordpress.android.fluxc.Dispatcher;
+import org.wordpress.android.fluxc.generated.AccountActionBuilder;
+import org.wordpress.android.fluxc.generated.AuthenticationActionBuilder;
 import org.wordpress.android.fluxc.generated.SiteActionBuilder;
 import org.wordpress.android.fluxc.store.AccountStore;
+import org.wordpress.android.fluxc.store.AccountStore.AuthenticatePayload;
+import org.wordpress.android.fluxc.store.AccountStore.OnAuthenticationChanged;
 import org.wordpress.android.fluxc.store.SiteStore;
+import org.wordpress.android.fluxc.store.SiteStore.OnSiteChanged;
 import org.wordpress.android.fluxc.store.SiteStore.OnURLChecked;
+import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.misc.PioupiouApp;
 import org.wordpress.pioupiou.postlist.PostListActivity;
-import org.wordpress.pioupiou.R;
 
 import javax.inject.Inject;
 
@@ -128,12 +133,14 @@ public class LoginActivity extends Activity {
             Timber.i("Start login process using WPCOM REST API on: " + mUrl);
             // WordPress.com login
             // TODO: insert cool stuff here
+            AuthenticatePayload payload = new AuthenticatePayload(mEmailView.getText().toString(),
+                    mPasswordView.getText().toString());
+            mDispatcher.dispatch(AuthenticationActionBuilder.newAuthenticateAction(payload));
         } else {
             Timber.i("Start login process using XMLRPC API on: " + mUrl);
             // Self Hosted login
             // TODO: insert cool stuff here
         }
-        showPostListAndFinish();
     }
 
     private void showPostListAndFinish() {
@@ -200,6 +207,24 @@ public class LoginActivity extends Activity {
         }
     }
 
-    // TODO: insert cool stuff here
+    @SuppressWarnings("unused")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onAuthenticationChanged(OnAuthenticationChanged event) {
+        if (event.isError()) {
+            // TODO
+        } else {
+            mDispatcher.dispatch(AccountActionBuilder.newFetchAccountAction());
+            mDispatcher.dispatch(AccountActionBuilder.newFetchSettingsAction());
+            mDispatcher.dispatch(SiteActionBuilder.newFetchSitesAction());
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSiteChanged(OnSiteChanged event) {
+        if (!event.isError()) {
+            showPostListAndFinish();
+        }
+    }
 }
 
