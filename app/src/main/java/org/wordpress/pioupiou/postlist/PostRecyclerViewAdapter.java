@@ -48,19 +48,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         return new ViewHolder(view);
     }
 
-    private final Transformation mTransformation = new Transformation() {
-        @Override
-        public Bitmap transform(Bitmap source) {
-            Bitmap circular = ImageUtils.getCircularBitmap(source);
-            source.recycle();
-            return circular;
-        }
-        @Override
-        public String key() {
-            return "circular-avatar";
-        }
-    };
-
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         PostModel post = mPosts.get(position);
@@ -83,6 +70,19 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                 .transform(mTransformation)
                 .into(holder.mAvatarView);
     }
+
+    private final Transformation mTransformation = new Transformation() {
+        @Override
+        public Bitmap transform(Bitmap source) {
+            Bitmap circular = ImageUtils.getCircularBitmap(source);
+            source.recycle();
+            return circular;
+        }
+        @Override
+        public String key() {
+            return "circular-avatar";
+        }
+    };
 
     @Override
     public int getItemCount() {
