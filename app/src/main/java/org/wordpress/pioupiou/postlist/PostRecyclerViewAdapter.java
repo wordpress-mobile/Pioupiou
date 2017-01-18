@@ -8,8 +8,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import org.wordpress.android.fluxc.model.AccountModel;
 import org.wordpress.android.fluxc.model.PostModel;
+import org.wordpress.android.util.HtmlUtils;
 import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.postlist.PostFragment.OnListFragmentInteractionListener;
 
@@ -37,12 +40,13 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        // get author name and gravatar from account
-        PostModel item = mPosts.get(position);
-        holder.mItem = item;
-        holder.mIdView.setText("Author Name"); // TODO: author name
-        holder.mContentView.setText(item.getContent());  // TODO: excerpt?
-        holder.mDateView.setText(item.getDateCreated());
+        PostModel post = mPosts.get(position);
+        String content = HtmlUtils.fastStripHtml(post.getContent());
+
+        holder.mItem = post;
+        holder.mIdView.setText(mAccount.getDisplayName());
+        holder.mContentView.setText(content);
+        holder.mDateView.setText(post.getDateCreated());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,8 +55,10 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                 }
             }
         });
-        // TODO: post/author image
-        //Picasso.with(holder.mView.getContext()).load(item..placeholder(R.mipmap.ic_egg).into(holder.mImageView);
+
+        // TODO: avatar should be rounded
+        Picasso.with(holder.mView.getContext()).load(mAccount.getAvatarUrl()).placeholder(R.mipmap.ic_egg)
+                .into(holder.mImageView);
     }
 
     @Override
