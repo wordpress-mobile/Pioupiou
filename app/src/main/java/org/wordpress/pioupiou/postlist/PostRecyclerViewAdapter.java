@@ -2,8 +2,8 @@ package org.wordpress.pioupiou.postlist;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +20,7 @@ import org.wordpress.android.util.ImageUtils;
 import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.postlist.PostListFragment.OnListFragmentInteractionListener;
 
+import java.text.BreakIterator;
 import java.util.List;
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder> {
@@ -60,17 +61,18 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         PostModel post = mPosts.get(position);
-        String content = HtmlUtils.fastStripHtml(post.getContent());
 
-        holder.mIdView.setText(mAccount.getDisplayName());
-        holder.mContentView.setText(content);
+        // TODO: we're getting the author from the account but it should be part of the
+        // post model so we can deal with multi-author sites
+        holder.mAuthorView.setText(mAccount.getDisplayName());
+        holder.mContentView.setText(makeExcerpt(post.getContent()));
         holder.mDateView.setText(post.getDateCreated());
 
         Picasso.with(holder.itemView.getContext())
                 .load(mAccount.getAvatarUrl())
                 .placeholder(R.mipmap.ic_egg)
                 .transform(mTransformation)
-                .into(holder.mImageView);
+                .into(holder.mAvatarView);
     }
 
     @Override
@@ -78,22 +80,56 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         return mPosts.size();
     }
 
+    private static final int MAX_EXCERPT_LEN = 200;
+    private static String makeExcerpt(final String content) {
+        if (TextUtils.isEmpty(content)) {
+            return null;
+        }
+
+        String text = HtmlUtils.fastStripHtml(content);
+        if (text.length() <= MAX_EXCERPT_LEN) {
+            return text.trim();
+        }
+
+        StringBuilder result = new StringBuilder();
+        BreakIterator wordIterator = BreakIterator.getWordInstance();
+        wordIterator.setText(text);
+        int start = wordIterator.first();
+        int end = wordIterator.next();
+        int totalLen = 0;
+        while (end != BreakIterator.DONE) {
+            String word = text.substring(start, end);
+            result.append(word);
+            totalLen += word.length();
+            if (totalLen >= MAX_EXCERPT_LEN) {
+                break;
+            }
+            start = end;
+            end = wordIterator.next();
+        }
+
+        if (totalLen == 0) {
+            return null;
+        }
+
+        return result.toString().trim() + "...";
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private final CardView mCardView;
-        private final ImageView mImageView;
-        private final TextView mIdView;
+        private final ImageView mAvatarView;
+        private final TextView mAuthorView;
         private final TextView mContentView;
         private final TextView mDateView;
 
         public ViewHolder(View view) {
             super(view);
-            mCardView = (CardView) view.findViewById(R.id.card_view);
-            mIdView = (TextView) view.findViewById(R.id.author);
+
+            mAuthorView = (TextView) view.findViewById(R.id.author);
             mContentView = (TextView) view.findViewById(R.id.message);
-            mImageView = (ImageView) view.findViewById(R.id.gravatar_view);
+            mAvatarView = (ImageView) view.findViewById(R.id.gravatar_view);
             mDateView = (TextView) view.findViewById(R.id.date);
 
-            mCardView.setOnClickListener(new View.OnClickListener() {
+            view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mListener != null) {
