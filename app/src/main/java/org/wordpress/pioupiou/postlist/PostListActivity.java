@@ -230,12 +230,23 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         }
     }
 
+    private void showProgress(boolean show) {
+        View progress = findViewById(R.id.progress);
+        progress.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    private void showError(String message) {
+        ToastUtils.showToast(this, message, ToastUtils.Duration.LONG);
+    }
+
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPostChanged(PostStore.OnPostChanged event) {
         mIsFetchingPosts = false;
         if (!event.isError()) {
             showPosts();
+        } else {
+            showError("Failed to fetch posts - " + event.error.message);
         }
         mSwipeRefreshLayout.setRefreshing(false);
     }
@@ -244,20 +255,24 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPostInstantiated(PostStore.OnPostInstantiated event) {
         if (!event.isError()) {
+            showProgress(true);
             PostModel post = event.post;
             post.setContent(mNewPostContent);
             PostStore.RemotePostPayload payload = new PostStore.RemotePostPayload(post, getSite());
             mDispatcher.dispatch(PostActionBuilder.newPushPostAction(payload));
+        } else {
+            showError("Failed to instantiate post - " + event.error.message);
         }
     }
 
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPostUploaded(PostStore.OnPostUploaded event) {
+        showProgress(false);
         if (!event.isError()) {
             showPosts();
         } else {
-            ToastUtils.showToast(this, "Failed to publish post - " + event.error.message, ToastUtils.Duration.LONG);
+            showError("Failed to publish post - " + event.error.message);
         }
     }
 }
