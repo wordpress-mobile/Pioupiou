@@ -22,6 +22,7 @@ import com.fenchtose.tooltip.Tooltip.Listener;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.wordpress.android.fluxc.Dispatcher;
+import org.wordpress.android.fluxc.action.PostAction;
 import org.wordpress.android.fluxc.generated.PostActionBuilder;
 import org.wordpress.android.fluxc.model.PostModel;
 import org.wordpress.android.fluxc.model.SiteModel;
@@ -46,6 +47,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
 
     // State
     private boolean mNewPostVisible;
+    private boolean mIsFetchingPosts;
 
     private String mNewPostContent;
 
@@ -67,7 +69,9 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        fetchPosts();
+                        if (!mIsFetchingPosts) {
+                            fetchPosts();
+                        }
                     }
                 }
         );
@@ -110,11 +114,15 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
             return;
         }
 
+        mIsFetchingPosts = true;
         mDispatcher.dispatch(PostActionBuilder.newFetchPostsAction(
                 new PostStore.FetchPostsPayload(site)));
         mSwipeRefreshLayout.setRefreshing(true);
     }
 
+    /*
+     * returns the current site to use for the post list
+     */
     private SiteModel getSite() {
         List<SiteModel> sites = mSiteStore.getSitesByNameOrUrlMatching("nbradbury.wordpress.com");
         if (sites.size() != 0) {
@@ -124,6 +132,9 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         }
     }
 
+    /*
+     * called when the user taps a post in the list
+     */
     @Override
     public void onListFragmentInteraction(PostModel post) {
         Timber.i("Post tapped");
@@ -154,8 +165,6 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    // New post
 
     private void createNewPost() {
         if (mNewPostVisible) {
@@ -195,23 +204,23 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         sendButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                publishPost(editText.getText().toString());
+                mNewPostContent = editText.getText().toString();
                 // Clear the saved text
                 editText.setText("");
                 tooltip.dismiss(true);
+                publishPost();
             }
         });
     }
 
     // Publish post
-    private void publishPost(String text) {
-        Timber.i("Publishing post: " + text);
-        if (TextUtils.isEmpty(text)) {
+    private void publishPost() {
+        if (TextUtils.isEmpty(mNewPostContent)) {
             ToastUtils.showToast(this, "Can't publish an empty post");
             return;
         }
 
-        mNewPostContent = text;
+        // instantiate a new post, event handler will take care of setting the content and uploading it
         PostStore.InstantiatePostPayload payload = new PostStore.InstantiatePostPayload(getSite(), false);
         mDispatcher.dispatch(PostActionBuilder.newInstantiatePostAction(payload));
     }
@@ -238,18 +247,32 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         ToastUtils.showToast(this, message, ToastUtils.Duration.LONG);
     }
 
+    /*
+     * called whenever the post list changes, such as when a fetch posts has completed
+     */
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPostChanged(PostStore.OnPostChanged event) {
+        if (event.causeOfChange == PostAction.FETCH_POSTS
+                || event.causeOfChange == PostAction.FETCHED_POSTS) {
+            mIsFetchingPosts = false;
+        }
+
         if (!event.isError()) {
             showPosts();
         } else {
-            showError("OnPostChanged error - " + event.error.message);
+            showError("OnPostChanged error - "
+                    + event.error.message
+                    + " (" + event.causeOfChange.toString() + ")");
         }
+
         mSwipeRefreshLayout.setRefreshing(false);
-        showProgress(false);
     }
 
+    /*
+     * called when a new post has been instantiated - we use this to set the new post's content
+     * and actually publish it
+     */
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPostInstantiated(PostStore.OnPostInstantiated event) {
@@ -264,6 +287,9 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         }
     }
 
+    /*
+     * called when a new post has been uploaded
+     */
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPostUploaded(PostStore.OnPostUploaded event) {
