@@ -35,14 +35,18 @@ import javax.inject.Inject;
 
 import timber.log.Timber;
 
+import static org.wordpress.android.fluxc.store.AccountStore.AuthenticationErrorType.NEEDS_2FA;
+
 public class LoginActivity extends Activity {
     // UI references
     private TextView mHelpView;
     private EditText mUrlView;
     private EditText mEmailView;
     private EditText mPasswordView;
+    private EditText mAuthCodeView;
     private Button mNextButton;
     private Button mLogInButton;
+    private Button mLogInWithCodeButton;
     private View mImageEggView;
 
     // State
@@ -119,6 +123,28 @@ public class LoginActivity extends Activity {
         });
     }
 
+    public void bindTwoFactorAuthFragmentReferences(View view) {
+        mAuthCodeView = (EditText) view.findViewById(R.id.two_factor_code);
+        mAuthCodeView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                    attempt2FALogin();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        mLogInWithCodeButton = (Button) view.findViewById(R.id.login_button);
+        mLogInWithCodeButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                attempt2FALogin();
+            }
+        });
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -182,6 +208,13 @@ public class LoginActivity extends Activity {
                 .replace(R.id.fragment_container, new EmailPasswordFragment()).addToBackStack(null).commit();
     }
 
+    private void set2FAFieldsVisible(boolean visible) {
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out,
+                        android.R.animator.fade_in, android.R.animator.fade_out)
+                .replace(R.id.fragment_container, new TwoFactorAuthFragment()).addToBackStack(null).commit();
+    }
+
     private void setButtonEnabled(Button button, boolean enabled) {
         if (button != null) {
             button.setEnabled(enabled);
@@ -199,6 +232,14 @@ public class LoginActivity extends Activity {
         }
         setButtonEnabled(mLogInButton, !visible);
         setButtonEnabled(mNextButton, !visible);
+    }
+
+    private void attempt2FALogin() {
+        AuthenticatePayload payload = new AuthenticatePayload(mEmailView.getText().toString(),
+                mPasswordView.getText().toString());
+        payload.twoStepCode = mAuthCodeView.getText().toString();
+        payload.shouldSendTwoStepSms = false;
+        mDispatcher.dispatch(AuthenticationActionBuilder.newAuthenticateAction(payload));
     }
 
     // FluxC Events
@@ -225,9 +266,13 @@ public class LoginActivity extends Activity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onAuthenticationChanged(OnAuthenticationChanged event) {
         if (event.isError()) {
-            // TODO
             Timber.i("onAuthenticationChanged error");
-            Toast.makeText(this, event.error.message, Toast.LENGTH_SHORT).show();
+            if (event.error.type == NEEDS_2FA) {
+                set2FAFieldsVisible(true);
+            } else {
+                Toast.makeText(this, event.error.message, Toast.LENGTH_SHORT).show();
+            }
+
         } else {
             mDispatcher.dispatch(AccountActionBuilder.newFetchAccountAction());
             mDispatcher.dispatch(AccountActionBuilder.newFetchSettingsAction());

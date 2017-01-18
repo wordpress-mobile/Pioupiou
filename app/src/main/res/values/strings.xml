@@ -6,9 +6,11 @@
     <string name="login_title">Pioupiou</string>
     <string name="login_help_url">What\'s your site address (also called site URL)? It should be something like:\n  - ponyexpress.com\n  - ponyexpress.wordpress.com\n  - http://www.ponyexpre.ss</string>
     <string name="login_help_username_and_password">Enter your username (or email address) and password</string>
+    <string name="login_help_2fa">Enter auth code</string>
     <string name="prompt_url">Site address (URL)</string>
     <string name="prompt_email">Username or email</string>
     <string name="prompt_password">Password</string>
+    <string name="prompt_code">2fa code</string>
     <string name="action_next">Next</string>
     <string name="action_login">Log in</string>
     <string name="error_invalid_url">This site address (URL) is invalid</string>
