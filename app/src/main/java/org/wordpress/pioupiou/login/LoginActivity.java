@@ -3,6 +3,7 @@ package org.wordpress.pioupiou.login;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -47,6 +49,7 @@ public class LoginActivity extends Activity {
     private boolean mUrlValidated;
     private boolean mUrlIsWPCom;
     private String mUrl;
+    private String mXMLRPCUrl;
 
     // FluxC
     @Inject Dispatcher mDispatcher;
@@ -140,6 +143,22 @@ public class LoginActivity extends Activity {
             Timber.i("Start login process using XMLRPC API on: " + mUrl);
             // Self Hosted login
             // TODO: insert cool stuff here
+            if (!TextUtils.isEmpty(mXMLRPCUrl)) {
+                // TODO: we might want to check that all needed methods are exposed in the XML RPC interface
+                // but for the sake of this exercise we're only authenticating and hoping for everything to be alright
+
+                // setup... grrr
+                SiteStore.RefreshSitesXMLRPCPayload refreshSitesXMLRPCPayload = new SiteStore.RefreshSitesXMLRPCPayload();
+                refreshSitesXMLRPCPayload.username = mEmailView.getText().toString();
+                refreshSitesXMLRPCPayload.password = mPasswordView.getText().toString();
+                refreshSitesXMLRPCPayload.url = mXMLRPCUrl;
+
+                mDispatcher.dispatch(SiteActionBuilder.newFetchSitesXmlRpcAction(refreshSitesXMLRPCPayload));
+
+            } else {
+                // TODO show some error
+                Timber.i("attempt login but we don't have a XMLRPC url -  error");
+            }
         }
     }
 
@@ -195,6 +214,7 @@ public class LoginActivity extends Activity {
         setProgressVisible(false);
 
         if (event.isError()) {
+            Timber.w("onUrlChecked error: " + event.error.type);
             mUrlView.setError(getText(R.string.error_invalid_url));
         } else {
             mUrl = event.url;
@@ -204,6 +224,11 @@ public class LoginActivity extends Activity {
             setEmailPasswordFieldsVisible(true);
             // TODO: Trigger the discovery process here (if not mUrlIsWPCom, we want to make sure it's a self hosted
             // site and not a random site.
+            if (!mUrlIsWPCom) {
+                SiteStore.RefreshSitesXMLRPCPayload payload = new SiteStore.RefreshSitesXMLRPCPayload();
+                payload.url = mUrl;
+                mDispatcher.dispatch(AuthenticationActionBuilder.newDiscoverEndpointAction(payload));
+            }
         }
     }
 
@@ -212,6 +237,8 @@ public class LoginActivity extends Activity {
     public void onAuthenticationChanged(OnAuthenticationChanged event) {
         if (event.isError()) {
             // TODO
+            Timber.i("onAuthenticationChanged error");
+            Toast.makeText(this, event.error.message, Toast.LENGTH_SHORT).show();
         } else {
             mDispatcher.dispatch(AccountActionBuilder.newFetchAccountAction());
             mDispatcher.dispatch(AccountActionBuilder.newFetchSettingsAction());
@@ -224,7 +251,23 @@ public class LoginActivity extends Activity {
     public void onSiteChanged(OnSiteChanged event) {
         if (!event.isError()) {
             showPostListAndFinish();
+        } else {
+            // TODO
+            Timber.i("onSiteChanged error");
         }
     }
+
+    @SuppressWarnings("unused")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDiscoveryChanged(AccountStore.OnDiscoveryResponse event) {
+        if (!event.isError()) {
+            Timber.i("onDiscoveryChanged NO error but... " + event.xmlRpcEndpoint);
+            mXMLRPCUrl = event.xmlRpcEndpoint;
+        } else {
+            // TODO show error
+            Timber.i("onDiscoveryChanged error");
+        }
+    }
+
 }
 
