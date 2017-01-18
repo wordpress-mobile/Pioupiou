@@ -1,6 +1,7 @@
 package org.wordpress.pioupiou.postlist;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,10 +11,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import org.wordpress.android.fluxc.model.AccountModel;
 import org.wordpress.android.fluxc.model.PostModel;
 import org.wordpress.android.util.HtmlUtils;
+import org.wordpress.android.util.ImageUtils;
 import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.postlist.PostListFragment.OnListFragmentInteractionListener;
 
@@ -41,6 +44,19 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         return new ViewHolder(view);
     }
 
+    private final Transformation mTransformation = new Transformation() {
+        @Override
+        public Bitmap transform(Bitmap source) {
+            Bitmap circular = ImageUtils.getCircularBitmap(source);
+            source.recycle();
+            return circular;
+        }
+        @Override
+        public String key() {
+            return "circular-avatar";
+        }
+    };
+
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         PostModel post = mPosts.get(position);
@@ -50,8 +66,10 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.mContentView.setText(content);
         holder.mDateView.setText(post.getDateCreated());
 
-        // TODO: avatar should be rounded
-        Picasso.with(holder.itemView.getContext()).load(mAccount.getAvatarUrl()).placeholder(R.mipmap.ic_egg)
+        Picasso.with(holder.itemView.getContext())
+                .load(mAccount.getAvatarUrl())
+                .placeholder(R.mipmap.ic_egg)
+                .transform(mTransformation)
                 .into(holder.mImageView);
     }
 
