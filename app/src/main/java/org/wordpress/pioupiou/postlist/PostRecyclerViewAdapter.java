@@ -31,6 +31,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private final OnListFragmentInteractionListener mListener;
     private final AccountModel mAccount;
     private final LayoutInflater mInflater;
+    private final int mAvatarSz;
 
     public PostRecyclerViewAdapter(Context context,
                                    AccountModel account,
@@ -40,6 +41,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         mAccount = account;
         mPosts = posts;
         mListener = listener;
+        mAvatarSz = context.getResources().getDimensionPixelSize(R.dimen.post_avatar);
     }
 
     @Override
@@ -72,6 +74,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                 .load(mAccount.getAvatarUrl())
                 .placeholder(R.mipmap.ic_egg)
                 .transform(mTransformation)
+                .resize(mAvatarSz, mAvatarSz)
                 .into(holder.mAvatarView);
     }
 

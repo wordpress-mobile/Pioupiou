@@ -22,8 +22,8 @@
 
         <ImageView
             android:id="@+id/gravatar_view"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/post_avatar"
+            android:layout_height="@dimen/post_avatar"
             android:layout_marginLeft="8dp"
             tools:src="@mipmap/ic_egg" />
 
