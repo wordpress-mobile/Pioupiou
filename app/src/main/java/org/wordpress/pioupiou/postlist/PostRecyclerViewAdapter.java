@@ -24,10 +24,10 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private final AccountModel mAccount;
 
     public PostRecyclerViewAdapter(@NonNull AccountModel account,
-                                   @NonNull List<PostModel> items,
+                                   @NonNull List<PostModel> posts,
                                    OnListFragmentInteractionListener listener) {
         mAccount = account;
-        mPosts = items;
+        mPosts = posts;
         mListener = listener;
     }
 
@@ -47,7 +47,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.mIdView.setText(mAccount.getDisplayName());
         holder.mContentView.setText(content);
         holder.mDateView.setText(post.getDateCreated());
-        holder.mView.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
@@ -57,7 +57,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         });
 
         // TODO: avatar should be rounded
-        Picasso.with(holder.mView.getContext()).load(mAccount.getAvatarUrl()).placeholder(R.mipmap.ic_egg)
+        Picasso.with(holder.itemView.getContext()).load(mAccount.getAvatarUrl()).placeholder(R.mipmap.ic_egg)
                 .into(holder.mImageView);
     }
 
@@ -67,7 +67,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
         public final ImageView mImageView;
         public final TextView mIdView;
         public final TextView mContentView;
@@ -76,7 +75,6 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
         public ViewHolder(View view) {
             super(view);
-            mView = view;
             mIdView = (TextView) view.findViewById(R.id.author);
             mContentView = (TextView) view.findViewById(R.id.message);
             mImageView = (ImageView) view.findViewById(R.id.gravatar_view);

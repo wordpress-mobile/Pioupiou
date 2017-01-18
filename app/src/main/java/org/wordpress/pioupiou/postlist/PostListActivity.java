@@ -96,9 +96,8 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
             return;
         }
 
-        List<PostModel> posts = mPostStore.getPostsForSite(site);
         if (hasPostFragment()) {
-            getPostFragment().setPosts(mAccountStore.getAccount(), posts);
+            getPostFragment().setPosts(mAccountStore.getAccount(), mPostStore.getPostsForSite(site));
         }
     }
 
@@ -111,7 +110,8 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         }
 
         mIsFetchingPosts = true;
-        mDispatcher.dispatch(PostActionBuilder.newFetchPostsAction(new PostStore.FetchPostsPayload(site)));
+        mDispatcher.dispatch(PostActionBuilder.newFetchPostsAction(
+                new PostStore.FetchPostsPayload(site)));
         mSwipeRefreshLayout.setRefreshing(true);
     }
 
