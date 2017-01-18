@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +16,14 @@ import com.squareup.picasso.Transformation;
 
 import org.wordpress.android.fluxc.model.AccountModel;
 import org.wordpress.android.fluxc.model.PostModel;
+import org.wordpress.android.util.DateTimeUtils;
 import org.wordpress.android.util.HtmlUtils;
 import org.wordpress.android.util.ImageUtils;
 import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.postlist.PostListFragment.OnListFragmentInteractionListener;
 
 import java.text.BreakIterator;
+import java.util.Date;
 import java.util.List;
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder> {
@@ -66,7 +69,13 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         // post model so we can deal with multi-author sites
         holder.mAuthorView.setText(mAccount.getDisplayName());
         holder.mContentView.setText(makeExcerpt(post.getContent()));
-        holder.mDateView.setText(post.getDateCreated());
+
+        Date date = DateTimeUtils.dateFromIso8601(post.getDateCreated());
+        holder.mDateView.setText(DateUtils.getRelativeTimeSpanString(
+                date.getTime(),
+                System.currentTimeMillis(),
+                DateUtils.SECOND_IN_MILLIS,
+                DateUtils.FORMAT_ABBREV_ALL));
 
         Picasso.with(holder.itemView.getContext())
                 .load(mAccount.getAvatarUrl())
