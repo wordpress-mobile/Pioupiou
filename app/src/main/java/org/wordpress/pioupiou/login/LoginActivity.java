@@ -143,22 +143,18 @@ public class LoginActivity extends Activity {
             Timber.i("Start login process using XMLRPC API on: " + mUrl);
             // Self Hosted login
             // TODO: insert cool stuff here
-            if (!TextUtils.isEmpty(mXMLRPCUrl)) {
-                // TODO: we might want to check that all needed methods are exposed in the XML RPC interface
-                // but for the sake of this exercise we're only authenticating and hoping for everything to be alright
 
-                // setup... grrr
-                SiteStore.RefreshSitesXMLRPCPayload refreshSitesXMLRPCPayload = new SiteStore.RefreshSitesXMLRPCPayload();
-                refreshSitesXMLRPCPayload.username = mEmailView.getText().toString();
-                refreshSitesXMLRPCPayload.password = mPasswordView.getText().toString();
-                refreshSitesXMLRPCPayload.url = mXMLRPCUrl;
+            // TODO: we might want to check that all needed methods are exposed in the XML RPC interface
+            // but for the sake of this exercise we're only authenticating and hoping for everything to be alright
 
-                mDispatcher.dispatch(SiteActionBuilder.newFetchSitesXmlRpcAction(refreshSitesXMLRPCPayload));
+            // trigger the discovery process here (if not mUrlIsWPCom, we want to make sure it's a self hosted
+            // site and not a random site.)
+            SiteStore.RefreshSitesXMLRPCPayload payload = new SiteStore.RefreshSitesXMLRPCPayload();
+            payload.url = mUrl;
+            payload.username = mEmailView.getText().toString();
+            payload.password = mPasswordView.getText().toString();
+            mDispatcher.dispatch(AuthenticationActionBuilder.newDiscoverEndpointAction(payload));
 
-            } else {
-                // TODO show some error
-                Timber.i("attempt login but we don't have a XMLRPC url -  error");
-            }
         }
     }
 
@@ -222,13 +218,6 @@ public class LoginActivity extends Activity {
             mUrlValidated = true;
             Timber.i("Found a " + (mUrlIsWPCom ? "WPCom" : "Self Hosted or non WordPress") + " site on: " + mUrl);
             setEmailPasswordFieldsVisible(true);
-            // TODO: Trigger the discovery process here (if not mUrlIsWPCom, we want to make sure it's a self hosted
-            // site and not a random site.
-            if (!mUrlIsWPCom) {
-                SiteStore.RefreshSitesXMLRPCPayload payload = new SiteStore.RefreshSitesXMLRPCPayload();
-                payload.url = mUrl;
-                mDispatcher.dispatch(AuthenticationActionBuilder.newDiscoverEndpointAction(payload));
-            }
         }
     }
 
@@ -261,8 +250,23 @@ public class LoginActivity extends Activity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onDiscoveryChanged(AccountStore.OnDiscoveryResponse event) {
         if (!event.isError()) {
-            Timber.i("onDiscoveryChanged NO error but... " + event.xmlRpcEndpoint);
+            Timber.i("onDiscoveryChanged success " + event.xmlRpcEndpoint);
+
             mXMLRPCUrl = event.xmlRpcEndpoint;
+
+            if (!TextUtils.isEmpty(mXMLRPCUrl)) {
+                // now check sites
+                SiteStore.RefreshSitesXMLRPCPayload refreshSitesXMLRPCPayload = new SiteStore.RefreshSitesXMLRPCPayload();
+                refreshSitesXMLRPCPayload.username = mEmailView.getText().toString();
+                refreshSitesXMLRPCPayload.password = mPasswordView.getText().toString();
+                refreshSitesXMLRPCPayload.url = mXMLRPCUrl;
+
+                mDispatcher.dispatch(SiteActionBuilder.newFetchSitesXmlRpcAction(refreshSitesXMLRPCPayload));
+            } else {
+                // TODO show some error
+                Timber.i("attempt login but we don't have a XMLRPC url -  error");
+            }
+
         } else {
             // TODO show error
             Timber.i("onDiscoveryChanged error");
