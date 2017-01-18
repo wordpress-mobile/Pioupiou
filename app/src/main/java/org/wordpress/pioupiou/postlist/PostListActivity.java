@@ -43,8 +43,8 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     // State
-    boolean mNewPostVisible;
-    boolean mIsFetchingPosts;
+    private boolean mNewPostVisible;
+    private boolean mIsFetchingPosts;
 
     // FluxC
     @Inject Dispatcher mDispatcher;

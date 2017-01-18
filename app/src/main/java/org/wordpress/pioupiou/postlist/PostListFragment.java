@@ -68,7 +68,7 @@ public class PostListFragment extends Fragment {
         return view;
     }
 
-    protected void setPosts(@NonNull AccountModel account, @NonNull List<PostModel> posts) {
+    void setPosts(@NonNull AccountModel account, @NonNull List<PostModel> posts) {
         mRecyclerView.setAdapter(new PostRecyclerViewAdapter(getActivity(), account, posts, mListener));
     }
 
