@@ -46,7 +46,6 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
 
     // State
     private boolean mNewPostVisible;
-    private boolean mIsFetchingPosts;
 
     private String mNewPostContent;
 
@@ -68,9 +67,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        if (!mIsFetchingPosts) {
-                            fetchPosts();
-                        }
+                        fetchPosts();
                     }
                 }
         );
@@ -113,7 +110,6 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
             return;
         }
 
-        mIsFetchingPosts = true;
         mDispatcher.dispatch(PostActionBuilder.newFetchPostsAction(
                 new PostStore.FetchPostsPayload(site)));
         mSwipeRefreshLayout.setRefreshing(true);
@@ -131,7 +127,9 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     @Override
     public void onListFragmentInteraction(PostModel post) {
         Timber.i("Post tapped");
-        // TODO: edit?
+        PostStore.RemotePostPayload payload = new PostStore.RemotePostPayload(post, getSite());
+        mDispatcher.dispatch(PostActionBuilder.newDeletePostAction(payload));
+        showProgress(true);
     }
 
     // Menu
@@ -242,13 +240,13 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPostChanged(PostStore.OnPostChanged event) {
-        mIsFetchingPosts = false;
         if (!event.isError()) {
             showPosts();
         } else {
-            showError("Failed to fetch posts - " + event.error.message);
+            showError("OnPostChanged error - " + event.error.message);
         }
         mSwipeRefreshLayout.setRefreshing(false);
+        showProgress(false);
     }
 
     @SuppressWarnings("unused")
@@ -261,7 +259,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
             PostStore.RemotePostPayload payload = new PostStore.RemotePostPayload(post, getSite());
             mDispatcher.dispatch(PostActionBuilder.newPushPostAction(payload));
         } else {
-            showError("Failed to instantiate post - " + event.error.message);
+            showError("onPostInstantiated error - " + event.error.message);
         }
     }
 
@@ -272,7 +270,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         if (!event.isError()) {
             showPosts();
         } else {
-            showError("Failed to publish post - " + event.error.message);
+            showError("OnPostUploaded error - " + event.error.message);
         }
     }
 }
