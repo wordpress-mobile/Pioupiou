@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,6 +28,7 @@ import org.wordpress.android.fluxc.model.SiteModel;
 import org.wordpress.android.fluxc.store.AccountStore;
 import org.wordpress.android.fluxc.store.PostStore;
 import org.wordpress.android.fluxc.store.SiteStore;
+import org.wordpress.android.util.ToastUtils;
 import org.wordpress.persistentedittext.PersistentEditText;
 import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.misc.PioupiouApp;
@@ -45,6 +47,8 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     // State
     private boolean mNewPostVisible;
     private boolean mIsFetchingPosts;
+
+    private String mNewPostContent;
 
     // FluxC
     @Inject Dispatcher mDispatcher;
@@ -124,16 +128,6 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         }
     }
 
-    @SuppressWarnings("unused")
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onPostChanged(PostStore.OnPostChanged event) {
-        mIsFetchingPosts = false;
-        if (!event.isError()) {
-            showPosts();
-        }
-        mSwipeRefreshLayout.setRefreshing(false);
-    }
-
     @Override
     public void onListFragmentInteraction(PostModel post) {
         Timber.i("Post tapped");
@@ -202,10 +196,10 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         sendButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                publishPost(editText.getText().toString());
                 // Clear the saved text
                 editText.setText("");
                 tooltip.dismiss(true);
-                publishPost(editText.getText().toString());
             }
         });
     }
@@ -213,7 +207,14 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     // Publish post
     private void publishPost(String text) {
         Timber.i("Publishing post: " + text);
-        // TODO: Prepare the post and dispatch the action
+        if (TextUtils.isEmpty(text)) {
+            ToastUtils.showToast(this, "Can't publish an empty post");
+            return;
+        }
+
+        mNewPostContent = text;
+        PostStore.InstantiatePostPayload payload = new PostStore.InstantiatePostPayload(getSite(), false);
+        mDispatcher.dispatch(PostActionBuilder.newInstantiatePostAction(payload));
     }
 
     private boolean hasPostFragment() {
@@ -226,6 +227,37 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
             return (PostListFragment) fragment;
         } else {
             return null;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPostChanged(PostStore.OnPostChanged event) {
+        mIsFetchingPosts = false;
+        if (!event.isError()) {
+            showPosts();
+        }
+        mSwipeRefreshLayout.setRefreshing(false);
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPostInstantiated(PostStore.OnPostInstantiated event) {
+        if (!event.isError()) {
+            PostModel post = event.post;
+            post.setContent(mNewPostContent);
+            PostStore.RemotePostPayload payload = new PostStore.RemotePostPayload(post, getSite());
+            mDispatcher.dispatch(PostActionBuilder.newPushPostAction(payload));
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onPostUploaded(PostStore.OnPostUploaded event) {
+        if (!event.isError()) {
+            showPosts();
+        } else {
+            ToastUtils.showToast(this, "Failed to publish post - " + event.error.message, ToastUtils.Duration.LONG);
         }
     }
 }

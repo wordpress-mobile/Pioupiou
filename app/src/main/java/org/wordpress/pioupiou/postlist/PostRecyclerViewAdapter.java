@@ -57,12 +57,16 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.mAuthorView.setText(mAccount.getDisplayName());
         holder.mContentView.setText(makeExcerpt(post.getContent()));
 
-        Date date = DateTimeUtils.dateFromIso8601(post.getDateCreated());
-        holder.mDateView.setText(DateUtils.getRelativeTimeSpanString(
-                date.getTime(),
-                System.currentTimeMillis(),
-                DateUtils.SECOND_IN_MILLIS,
-                DateUtils.FORMAT_ABBREV_ALL));
+        if (post.getDateCreated() != null) {
+            Date date = DateTimeUtils.dateFromIso8601(post.getDateCreated());
+            holder.mDateView.setText(DateUtils.getRelativeTimeSpanString(
+                    date.getTime(),
+                    System.currentTimeMillis(),
+                    DateUtils.SECOND_IN_MILLIS,
+                    DateUtils.FORMAT_ABBREV_ALL));
+        } else {
+            holder.mDateView.setText("unknown");
+        }
 
         Picasso.with(holder.itemView.getContext())
                 .load(mAccount.getAvatarUrl())
