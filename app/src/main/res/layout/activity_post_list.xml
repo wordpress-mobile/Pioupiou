@@ -15,7 +15,7 @@
 
         <fragment
             android:id="@+id/list"
-            android:name="org.wordpress.pioupiou.postlist.PostFragment"
+            android:name="org.wordpress.pioupiou.postlist.PostListFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </RelativeLayout>

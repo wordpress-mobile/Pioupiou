@@ -30,7 +30,7 @@ import org.wordpress.android.fluxc.store.SiteStore;
 import org.wordpress.persistentedittext.PersistentEditText;
 import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.misc.PioupiouApp;
-import org.wordpress.pioupiou.postlist.PostFragment.OnListFragmentInteractionListener;
+import org.wordpress.pioupiou.postlist.PostListFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
@@ -220,10 +220,10 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         return getPostFragment() != null;
     }
 
-    private PostFragment getPostFragment() {
+    private PostListFragment getPostFragment() {
         Fragment fragment = getFragmentManager().findFragmentById(R.id.list);
-        if (fragment instanceof PostFragment) {
-            return (PostFragment) fragment;
+        if (fragment instanceof PostListFragment) {
+            return (PostListFragment) fragment;
         } else {
             return null;
         }

@@ -1,6 +1,6 @@
 package org.wordpress.pioupiou.postlist;
 
-import android.support.annotation.NonNull;
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +14,7 @@ import org.wordpress.android.fluxc.model.AccountModel;
 import org.wordpress.android.fluxc.model.PostModel;
 import org.wordpress.android.util.HtmlUtils;
 import org.wordpress.pioupiou.R;
-import org.wordpress.pioupiou.postlist.PostFragment.OnListFragmentInteractionListener;
+import org.wordpress.pioupiou.postlist.PostListFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
@@ -22,10 +22,13 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private final List<PostModel> mPosts;
     private final OnListFragmentInteractionListener mListener;
     private final AccountModel mAccount;
+    private final LayoutInflater mInflater;
 
-    public PostRecyclerViewAdapter(@NonNull AccountModel account,
-                                   @NonNull List<PostModel> posts,
+    public PostRecyclerViewAdapter(Context context,
+                                   AccountModel account,
+                                   List<PostModel> posts,
                                    OnListFragmentInteractionListener listener) {
+        mInflater = LayoutInflater.from(context);
         mAccount = account;
         mPosts = posts;
         mListener = listener;
@@ -33,8 +36,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_post, parent, false);
+        View view = mInflater.inflate(R.layout.post_item, parent, false);
         return new ViewHolder(view);
     }
 

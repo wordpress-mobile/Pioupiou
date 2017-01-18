@@ -23,7 +23,7 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class PostFragment extends Fragment {
+public class PostListFragment extends Fragment {
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -33,12 +33,12 @@ public class PostFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public PostFragment() {
+    public PostListFragment() {
     }
 
     @SuppressWarnings("unused")
-    public static PostFragment newInstance(int columnCount) {
-        PostFragment fragment = new PostFragment();
+    public static PostListFragment newInstance(int columnCount) {
+        PostListFragment fragment = new PostListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -69,7 +69,7 @@ public class PostFragment extends Fragment {
     }
 
     protected void setPosts(@NonNull AccountModel account, @NonNull List<PostModel> posts) {
-        mRecyclerView.setAdapter(new PostRecyclerViewAdapter(account, posts, mListener));
+        mRecyclerView.setAdapter(new PostRecyclerViewAdapter(getActivity(), account, posts, mListener));
     }
 
     @Override
