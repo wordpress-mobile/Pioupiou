@@ -1,6 +1,7 @@
 package org.wordpress.pioupiou.postlist;
 
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,18 +46,9 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         PostModel post = mPosts.get(position);
         String content = HtmlUtils.fastStripHtml(post.getContent());
 
-        holder.mItem = post;
         holder.mIdView.setText(mAccount.getDisplayName());
         holder.mContentView.setText(content);
         holder.mDateView.setText(post.getDateCreated());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
 
         // TODO: avatar should be rounded
         Picasso.with(holder.itemView.getContext()).load(mAccount.getAvatarUrl()).placeholder(R.mipmap.ic_egg)
@@ -69,18 +61,30 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final ImageView mImageView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public final TextView mDateView;
-        public PostModel mItem;
+        private final CardView mCardView;
+        private final ImageView mImageView;
+        private final TextView mIdView;
+        private final TextView mContentView;
+        private final TextView mDateView;
 
         public ViewHolder(View view) {
             super(view);
+            mCardView = (CardView) view.findViewById(R.id.card_view);
             mIdView = (TextView) view.findViewById(R.id.author);
             mContentView = (TextView) view.findViewById(R.id.message);
             mImageView = (ImageView) view.findViewById(R.id.gravatar_view);
             mDateView = (TextView) view.findViewById(R.id.date);
+
+            mCardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mListener != null) {
+                        int position = getAdapterPosition();
+                        PostModel post = mPosts.get(position);
+                        mListener.onListFragmentInteraction(post);
+                    }
+                }
+            });
         }
 
         @Override
