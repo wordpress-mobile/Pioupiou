@@ -1,27 +1,30 @@
 package org.wordpress.pioupiou.postlist;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
-
+import org.wordpress.android.fluxc.model.AccountModel;
+import org.wordpress.android.fluxc.model.PostModel;
 import org.wordpress.pioupiou.R;
-import org.wordpress.pioupiou.postlist.DummyContent.PostItem;
 import org.wordpress.pioupiou.postlist.PostFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder> {
-    private final List<PostItem> mValues; // Use a List<PostModel> instead
+    private final List<PostModel> mPosts;
     private final OnListFragmentInteractionListener mListener;
+    private final AccountModel mAccount;
 
-    public PostRecyclerViewAdapter(List<PostItem> items, OnListFragmentInteractionListener listener) {
-        mValues = items;
+    public PostRecyclerViewAdapter(@NonNull AccountModel account,
+                                   @NonNull List<PostModel> items,
+                                   OnListFragmentInteractionListener listener) {
+        mAccount = account;
+        mPosts = items;
         mListener = listener;
     }
 
@@ -34,12 +37,12 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        PostItem item = mValues.get(position);
+        // get author name and gravatar from account
+        PostModel item = mPosts.get(position);
         holder.mItem = item;
-        holder.mIdView.setText(item.authorName);
-        holder.mContentView.setText(item.message);
-        holder.mDateView.setText(DateUtils.getRelativeTimeSpanString(item.date, System.currentTimeMillis(),
-                DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL));
+        holder.mIdView.setText("Author Name"); // TODO: author name
+        holder.mContentView.setText(item.getContent());  // TODO: excerpt?
+        holder.mDateView.setText(item.getDateCreated());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,13 +51,13 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                 }
             }
         });
-        Picasso.with(holder.mView.getContext()).load(item.gravatarUrl).placeholder(R.mipmap.ic_egg)
-                .into(holder.mImageView);
+        // TODO: post/author image
+        //Picasso.with(holder.mView.getContext()).load(item..placeholder(R.mipmap.ic_egg).into(holder.mImageView);
     }
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return mPosts.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -63,7 +66,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         public final TextView mIdView;
         public final TextView mContentView;
         public final TextView mDateView;
-        public PostItem mItem;
+        public PostModel mItem;
 
         public ViewHolder(View view) {
             super(view);
