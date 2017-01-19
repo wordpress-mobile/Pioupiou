@@ -22,6 +22,7 @@ import org.wordpress.android.fluxc.generated.AccountActionBuilder;
 import org.wordpress.android.fluxc.generated.AuthenticationActionBuilder;
 import org.wordpress.android.fluxc.generated.SiteActionBuilder;
 import org.wordpress.android.fluxc.store.AccountStore;
+import org.wordpress.android.fluxc.store.AccountStore.OnDiscoveryResponse;
 import org.wordpress.android.fluxc.store.AccountStore.AuthenticatePayload;
 import org.wordpress.android.fluxc.store.AccountStore.OnAuthenticationChanged;
 import org.wordpress.android.fluxc.store.SiteStore;
@@ -243,7 +244,7 @@ public class LoginActivity extends Activity {
 
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onDiscoveryChanged(AccountStore.OnDiscoveryResponse event) {
+    public void onDiscoveryChanged(OnDiscoveryResponse event) {
         if (!event.isError()) {
             Timber.i("onDiscoveryChanged success " + event.xmlRpcEndpoint);
 
