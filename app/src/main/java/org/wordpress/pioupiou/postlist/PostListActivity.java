@@ -32,6 +32,7 @@ import org.wordpress.android.fluxc.store.PostStore;
 import org.wordpress.android.fluxc.store.SiteStore;
 import org.wordpress.android.util.ToastUtils;
 import org.wordpress.persistentedittext.PersistentEditText;
+import org.wordpress.pioupiou.BuildConfig;
 import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.misc.PioupiouApp;
 import org.wordpress.pioupiou.postlist.PostListFragment.OnListFragmentInteractionListener;
@@ -116,10 +117,10 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     }
 
     /*
-     * returns the site to use for the post list - currently always returns the very first site
+     * returns the site to use for the post list - relies on wp.SITE_DOMAIN in app/build.gradle
      */
     private SiteModel getSite() {
-        List<SiteModel> sites = mSiteStore.getSites();
+        List<SiteModel> sites = mSiteStore.getSitesByNameOrUrlMatching(BuildConfig.SITE_DOMAIN);
         if (sites.size() != 0) {
             return sites.get(0);
         } else {
