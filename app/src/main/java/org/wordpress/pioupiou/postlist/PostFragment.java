@@ -1,5 +1,6 @@
 package org.wordpress.pioupiou.postlist;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -10,8 +11,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.wordpress.android.fluxc.model.PostModel;
+import org.wordpress.android.fluxc.model.SiteModel;
+import org.wordpress.android.fluxc.store.PostStore;
 import org.wordpress.pioupiou.R;
+import org.wordpress.pioupiou.misc.PioupiouApp;
 import org.wordpress.pioupiou.postlist.DummyContent.PostItem;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * A fragment representing a list of Items.
@@ -22,7 +32,9 @@ import org.wordpress.pioupiou.postlist.DummyContent.PostItem;
 public class PostFragment extends Fragment {
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
+
     private OnListFragmentInteractionListener mListener;
+    private PostRecyclerViewAdapter postsAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -30,6 +42,7 @@ public class PostFragment extends Fragment {
      */
     public PostFragment() {
     }
+
 
     @SuppressWarnings("unused")
     public static PostFragment newInstance(int columnCount) {
@@ -63,9 +76,22 @@ public class PostFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new PostRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+            postsAdapter = new PostRecyclerViewAdapter(new ArrayList<PostModel>(0), mListener);
+            recyclerView.setAdapter(postsAdapter);
         }
         return view;
+    }
+
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (activity instanceof OnListFragmentInteractionListener) {
+            mListener = (OnListFragmentInteractionListener) activity;
+        } else {
+            throw new RuntimeException(activity.toString()
+                    + " must implement OnListFragmentInteractionListener");
+        }
     }
 
     @Override
@@ -87,6 +113,12 @@ public class PostFragment extends Fragment {
 
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(PostItem item);
+        void onListFragmentInteraction(PostModel item);
+    }
+
+
+    void updatePostsList(PostStore postStore, SiteModel firstWPCOMSite) {
+        List<PostModel> posts = postStore.getPostsForSite(firstWPCOMSite);
+        postsAdapter.newItems(posts);
     }
 }

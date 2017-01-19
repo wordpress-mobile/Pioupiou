@@ -1,6 +1,7 @@
 package org.wordpress.pioupiou.postlist;
 
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,19 +11,25 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import org.wordpress.android.fluxc.model.PostModel;
 import org.wordpress.pioupiou.R;
-import org.wordpress.pioupiou.postlist.DummyContent.PostItem;
 import org.wordpress.pioupiou.postlist.PostFragment.OnListFragmentInteractionListener;
 
 import java.util.List;
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder> {
-    private final List<PostItem> mValues; // Use a List<PostModel> instead
+    private final List<PostModel> mValues; // Use a List<PostModel> instead
     private final OnListFragmentInteractionListener mListener;
 
-    public PostRecyclerViewAdapter(List<PostItem> items, OnListFragmentInteractionListener listener) {
+    public PostRecyclerViewAdapter(List<PostModel> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
+    }
+
+    void newItems(List<PostModel> values) {
+        mValues.clear();
+        mValues.addAll(values);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -34,12 +41,11 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        PostItem item = mValues.get(position);
+        PostModel item = mValues.get(position);
         holder.mItem = item;
-        holder.mIdView.setText(item.authorName);
-        holder.mContentView.setText(item.message);
-        holder.mDateView.setText(DateUtils.getRelativeTimeSpanString(item.date, System.currentTimeMillis(),
-                DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL));
+        holder.mIdView.setText(String.valueOf(item.getId()));
+        holder.mContentView.setText(item.getContent());
+        holder.mDateView.setText(item.getDateCreated());
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,8 +54,10 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
                 }
             }
         });
-        Picasso.with(holder.mView.getContext()).load(item.gravatarUrl).placeholder(R.mipmap.ic_egg)
-                .into(holder.mImageView);
+        if (!TextUtils.isEmpty(item.getLink())) {
+            Picasso.with(holder.mView.getContext()).load(item.getLink()).placeholder(R.mipmap.ic_egg)
+                    .into(holder.mImageView);
+        }
     }
 
     @Override
@@ -63,7 +71,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         public final TextView mIdView;
         public final TextView mContentView;
         public final TextView mDateView;
-        public PostItem mItem;
+        public PostModel mItem;
 
         public ViewHolder(View view) {
             super(view);

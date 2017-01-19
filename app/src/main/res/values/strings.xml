@@ -1,6 +1,12 @@
 <resources>
     <string name="app_name">Pioupiou</string>
 
+    <string name="post">Post</string>
+    <string name="page">Page</string>
+
+    <string name="blog_not_found">An error occurred when accessing this blog</string>
+    <string name="file_not_found">Couldn\'t find the media file for upload. Was it deleted or moved?</string>
+
     <!-- Strings related to login -->
 
     <string name="login_title">Pioupiou</string>
@@ -23,5 +29,10 @@
 
     <!-- New post -->
     <string name="prompt_new_post">What\'s on your mind?</string>
+
+    <string name="error_media_upload">An error occurred while uploading media</string>
+    <string name="error_media_upload_connection">A connection error occurred while uploading media</string>
+    <string name="file_error_create">Couldn\'t create temp file for media upload. Make sure there is enough free space on your device.</string>
+    <string name="error_upload">An error occurred while uploading the post</string>
 
 </resources>

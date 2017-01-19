@@ -31,4 +31,6 @@ public class PioupiouApp extends Application {
     public AppComponent component() {
         return mComponent;
     }
+
+    public static int blog_id = 15592836; //eritreocazzulati.wordpress.com
 }
