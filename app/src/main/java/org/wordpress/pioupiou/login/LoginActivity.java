@@ -22,6 +22,7 @@ import org.wordpress.android.fluxc.generated.AccountActionBuilder;
 import org.wordpress.android.fluxc.generated.AuthenticationActionBuilder;
 import org.wordpress.android.fluxc.generated.SiteActionBuilder;
 import org.wordpress.android.fluxc.store.AccountStore;
+import org.wordpress.android.fluxc.store.AccountStore.OnDiscoveryResponse;
 import org.wordpress.android.fluxc.store.AccountStore.AuthenticatePayload;
 import org.wordpress.android.fluxc.store.AccountStore.OnAuthenticationChanged;
 import org.wordpress.android.fluxc.store.SiteStore;
@@ -168,10 +169,6 @@ public class LoginActivity extends Activity {
         } else {
             Timber.i("Start login process using XMLRPC API on: " + mUrl);
             // Self Hosted login
-            // TODO: insert cool stuff here
-
-            // TODO: we might want to check that all needed methods are exposed in the XML RPC interface
-            // but for the sake of this exercise we're only authenticating and hoping for everything to be alright
 
             // trigger the discovery process here (if not mUrlIsWPCom, we want to make sure it's a self hosted
             // site and not a random site.)
@@ -292,7 +289,7 @@ public class LoginActivity extends Activity {
 
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onDiscoveryChanged(AccountStore.OnDiscoveryResponse event) {
+    public void onDiscoveryChanged(OnDiscoveryResponse event) {
         if (!event.isError()) {
             Timber.i("onDiscoveryChanged success " + event.xmlRpcEndpoint);
 
