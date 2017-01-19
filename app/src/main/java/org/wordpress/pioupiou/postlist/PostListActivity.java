@@ -139,9 +139,9 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     public void onListFragmentInteraction(PostModel post) {
         Timber.i("Post tapped");
         // uncomment to delete a post when tapped - useful to remove test posts
-        //PostStore.RemotePostPayload payload = new PostStore.RemotePostPayload(post, getSite());
-        //mDispatcher.dispatch(PostActionBuilder.newDeletePostAction(payload));
-        //showProgress(true);
+        // PostStore.RemotePostPayload payload = new PostStore.RemotePostPayload(post, getSite());
+        // mDispatcher.dispatch(PostActionBuilder.newDeletePostAction(payload));
+        // showProgress(true);
     }
 
     // Menu

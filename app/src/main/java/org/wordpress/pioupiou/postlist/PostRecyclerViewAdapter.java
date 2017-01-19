@@ -131,7 +131,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             return null;
         }
 
-        return result.toString().trim() + "...";
+        return result.toString().trim() + "…";
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
