@@ -30,7 +30,7 @@
         android:inputType="number"
         android:maxLines="1"
         android:maxLength="6"
-        app:persistenceEnabled="true"
+        app:persistenceEnabled="false"
         tools:text="ponyman" />
 
     <Button
