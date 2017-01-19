@@ -121,10 +121,10 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     }
 
     /*
-     * returns the current site to use for the post list
+     * returns the site to use for the post list - currently always returns the very first site
      */
     private SiteModel getSite() {
-        List<SiteModel> sites = mSiteStore.getSitesByNameOrUrlMatching("nbradbury.wordpress.com");
+        List<SiteModel> sites = mSiteStore.getSites();
         if (sites.size() != 0) {
             return sites.get(0);
         } else {
