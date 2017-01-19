@@ -268,7 +268,6 @@ public class LoginActivity extends Activity {
             } else {
                 Toast.makeText(this, event.error.message, Toast.LENGTH_SHORT).show();
             }
-
         } else {
             mDispatcher.dispatch(AccountActionBuilder.newFetchAccountAction());
             mDispatcher.dispatch(AccountActionBuilder.newFetchSettingsAction());
