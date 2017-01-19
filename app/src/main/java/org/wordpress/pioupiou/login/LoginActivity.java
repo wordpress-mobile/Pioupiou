@@ -3,6 +3,7 @@ package org.wordpress.pioupiou.login;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -20,6 +22,7 @@ import org.wordpress.android.fluxc.generated.AccountActionBuilder;
 import org.wordpress.android.fluxc.generated.AuthenticationActionBuilder;
 import org.wordpress.android.fluxc.generated.SiteActionBuilder;
 import org.wordpress.android.fluxc.store.AccountStore;
+import org.wordpress.android.fluxc.store.AccountStore.OnDiscoveryResponse;
 import org.wordpress.android.fluxc.store.AccountStore.AuthenticatePayload;
 import org.wordpress.android.fluxc.store.AccountStore.OnAuthenticationChanged;
 import org.wordpress.android.fluxc.store.SiteStore;
@@ -47,6 +50,7 @@ public class LoginActivity extends Activity {
     private boolean mUrlValidated;
     private boolean mUrlIsWPCom;
     private String mUrl;
+    private String mXMLRPCUrl;
 
     // FluxC
     @Inject Dispatcher mDispatcher;
@@ -139,7 +143,14 @@ public class LoginActivity extends Activity {
         } else {
             Timber.i("Start login process using XMLRPC API on: " + mUrl);
             // Self Hosted login
-            // TODO: insert cool stuff here
+
+            // trigger the discovery process here (if not mUrlIsWPCom, we want to make sure it's a self hosted
+            // site and not a random site.)
+            SiteStore.RefreshSitesXMLRPCPayload payload = new SiteStore.RefreshSitesXMLRPCPayload();
+            payload.url = mUrl;
+            payload.username = mEmailView.getText().toString();
+            payload.password = mPasswordView.getText().toString();
+            mDispatcher.dispatch(AuthenticationActionBuilder.newDiscoverEndpointAction(payload));
         }
     }
 
@@ -195,6 +206,7 @@ public class LoginActivity extends Activity {
         setProgressVisible(false);
 
         if (event.isError()) {
+            Timber.w("onUrlChecked error: " + event.error.type);
             mUrlView.setError(getText(R.string.error_invalid_url));
         } else {
             mUrl = event.url;
@@ -202,8 +214,6 @@ public class LoginActivity extends Activity {
             mUrlValidated = true;
             Timber.i("Found a " + (mUrlIsWPCom ? "WPCom" : "Self Hosted or non WordPress") + " site on: " + mUrl);
             setEmailPasswordFieldsVisible(true);
-            // TODO: Trigger the discovery process here (if not mUrlIsWPCom, we want to make sure it's a self hosted
-            // site and not a random site.
         }
     }
 
@@ -212,6 +222,8 @@ public class LoginActivity extends Activity {
     public void onAuthenticationChanged(OnAuthenticationChanged event) {
         if (event.isError()) {
             // TODO
+            Timber.i("onAuthenticationChanged error");
+            Toast.makeText(this, event.error.message, Toast.LENGTH_SHORT).show();
         } else {
             mDispatcher.dispatch(AccountActionBuilder.newFetchAccountAction());
             mDispatcher.dispatch(AccountActionBuilder.newFetchSettingsAction());
@@ -224,6 +236,36 @@ public class LoginActivity extends Activity {
     public void onSiteChanged(OnSiteChanged event) {
         if (!event.isError()) {
             showPostListAndFinish();
+        } else {
+            // TODO
+            Timber.i("onSiteChanged error");
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDiscoveryChanged(OnDiscoveryResponse event) {
+        if (!event.isError()) {
+            Timber.i("onDiscoveryChanged success " + event.xmlRpcEndpoint);
+
+            mXMLRPCUrl = event.xmlRpcEndpoint;
+
+            if (!TextUtils.isEmpty(mXMLRPCUrl)) {
+                // now check sites
+                SiteStore.RefreshSitesXMLRPCPayload refreshSitesXMLRPCPayload =
+                        new SiteStore.RefreshSitesXMLRPCPayload();
+                refreshSitesXMLRPCPayload.username = mEmailView.getText().toString();
+                refreshSitesXMLRPCPayload.password = mPasswordView.getText().toString();
+                refreshSitesXMLRPCPayload.url = mXMLRPCUrl;
+
+                mDispatcher.dispatch(SiteActionBuilder.newFetchSitesXmlRpcAction(refreshSitesXMLRPCPayload));
+            } else {
+                // TODO show some error
+                Timber.i("attempt login but we don't have a XMLRPC url -  error");
+            }
+        } else {
+            // TODO show error
+            Timber.i("onDiscoveryChanged error");
         }
     }
 }
