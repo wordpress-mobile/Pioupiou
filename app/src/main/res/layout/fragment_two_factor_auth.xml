@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:hint="@string/prompt_code"
-        android:imeActionId="@+id/login"
+        android:imeActionId="@+id/checkTwoFactorCode"
         android:imeActionLabel="@string/action_login"
         android:imeOptions="actionUnspecified"
         android:inputType="number"
