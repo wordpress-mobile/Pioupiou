@@ -3,6 +3,7 @@ package org.wordpress.pioupiou.postlist;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -70,15 +71,21 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
                     @Override
                     public void onRefresh() {
                         if (!mIsFetchingPosts) {
-                            fetchPosts();
+                            fetchPosts(getSite());
                         }
                     }
                 }
         );
 
         // immediately show existing posts then fetch the latest from the server
-        showPosts();
-        fetchPosts();
+        SiteModel site = getSite();
+        if (site == null) {
+            Timber.w("Can't show posts for null site");
+            showError("No site found");
+        } else {
+            showPosts(site);
+            fetchPosts(site);
+        }
     }
 
     @Override
@@ -93,27 +100,15 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         mDispatcher.unregister(this);
     }
 
-    private void showPosts() {
+    private void showPosts(@NonNull SiteModel site) {
         Timber.i("Show posts started");
-        SiteModel site = getSite();
-        if (site == null) {
-            Timber.w("Can't show posts for null site");
-            return;
-        }
-
         if (hasPostFragment()) {
             getPostFragment().setPosts(mAccountStore.getAccount(), mPostStore.getPostsForSite(site));
         }
     }
 
-    private void fetchPosts() {
+    private void fetchPosts(@NonNull SiteModel site) {
         Timber.i("Fetch posts started");
-        SiteModel site = getSite();
-        if (site == null) {
-            Timber.w("Can't fetch posts for null site");
-            return;
-        }
-
         mIsFetchingPosts = true;
         mDispatcher.dispatch(PostActionBuilder.newFetchPostsAction(
                 new PostStore.FetchPostsPayload(site)));
@@ -259,7 +254,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         }
 
         if (!event.isError()) {
-            showPosts();
+            showPosts(getSite());
         } else {
             showError("OnPostChanged error - "
                     + event.error.message
@@ -295,7 +290,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     public void onPostUploaded(PostStore.OnPostUploaded event) {
         showProgress(false);
         if (!event.isError()) {
-            showPosts();
+            showPosts(getSite());
         } else {
             showError("OnPostUploaded error - " + event.error.message);
         }
