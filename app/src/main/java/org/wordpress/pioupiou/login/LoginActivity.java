@@ -180,7 +180,6 @@ public class LoginActivity extends Activity {
             payload.username = mEmailView.getText().toString();
             payload.password = mPasswordView.getText().toString();
             mDispatcher.dispatch(AuthenticationActionBuilder.newDiscoverEndpointAction(payload));
-
         }
     }
 
@@ -301,7 +300,8 @@ public class LoginActivity extends Activity {
 
             if (!TextUtils.isEmpty(mXMLRPCUrl)) {
                 // now check sites
-                SiteStore.RefreshSitesXMLRPCPayload refreshSitesXMLRPCPayload = new SiteStore.RefreshSitesXMLRPCPayload();
+                SiteStore.RefreshSitesXMLRPCPayload refreshSitesXMLRPCPayload =
+                        new SiteStore.RefreshSitesXMLRPCPayload();
                 refreshSitesXMLRPCPayload.username = mEmailView.getText().toString();
                 refreshSitesXMLRPCPayload.password = mPasswordView.getText().toString();
                 refreshSitesXMLRPCPayload.url = mXMLRPCUrl;
@@ -311,12 +311,10 @@ public class LoginActivity extends Activity {
                 // TODO show some error
                 Timber.i("attempt login but we don't have a XMLRPC url -  error");
             }
-
         } else {
             // TODO show error
             Timber.i("onDiscoveryChanged error");
         }
     }
-
 }
 
