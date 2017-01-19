@@ -54,8 +54,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     public void onBindViewHolder(final ViewHolder holder, int position) {
         PostModel post = mPosts.get(position);
 
-        // TODO: we're getting the author from the account but it should be part of the
-        // post model so we can deal with multi-author sites
+        // TODO: we get the author from the account but it should be part of the post model
         holder.mAuthorView.setText(mAccount.getDisplayName());
         holder.mContentView.setText(makeExcerpt(post.getContent()));
 
@@ -128,7 +127,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             return null;
         }
 
-        return result.toString().trim() + "...";
+        return result.toString().trim() + "…";
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
