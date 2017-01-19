@@ -95,6 +95,10 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         return mPosts.size();
     }
 
+    /*
+     * return an excerpt from the full post content - breaks at words rather than at a specific
+     * character position
+     */
     private static final int MAX_EXCERPT_LEN = 200;
     private static String makeExcerpt(final String content) {
         if (TextUtils.isEmpty(content)) {
@@ -127,7 +131,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
             return null;
         }
 
-        return result.toString().trim() + "…";
+        return result.toString().trim() + "...";
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
