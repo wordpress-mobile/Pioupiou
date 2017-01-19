@@ -28,6 +28,7 @@ public class PostListFragment extends Fragment {
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
     private RecyclerView mRecyclerView;
+    private PostRecyclerViewAdapter mAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -65,11 +66,14 @@ public class PostListFragment extends Fragment {
             mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mColumnCount));
         }
 
+        mAdapter = new PostRecyclerViewAdapter(getActivity(), mListener);
+        mRecyclerView.setAdapter(mAdapter);
+
         return view;
     }
 
     void setPosts(@NonNull AccountModel account, @NonNull List<PostModel> posts) {
-        mRecyclerView.setAdapter(new PostRecyclerViewAdapter(getActivity(), account, posts, mListener));
+        mAdapter.setPosts(account, posts);
     }
 
     @Override

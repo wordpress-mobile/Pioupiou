@@ -2,6 +2,7 @@ package org.wordpress.pioupiou.postlist;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -27,21 +28,23 @@ import java.util.Date;
 import java.util.List;
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder> {
-    private final List<PostModel> mPosts;
     private final OnListFragmentInteractionListener mListener;
-    private final AccountModel mAccount;
     private final LayoutInflater mInflater;
     private final int mAvatarSz;
+    private AccountModel mAccount;
+    private List<PostModel> mPosts;
 
     public PostRecyclerViewAdapter(Context context,
-                                   AccountModel account,
-                                   List<PostModel> posts,
                                    OnListFragmentInteractionListener listener) {
         mInflater = LayoutInflater.from(context);
-        mAccount = account;
-        mPosts = posts;
         mListener = listener;
         mAvatarSz = context.getResources().getDimensionPixelSize(R.dimen.post_avatar);
+    }
+
+    public void setPosts(@NonNull AccountModel account, @NonNull List<PostModel> posts) {
+        mAccount = account;
+        mPosts = posts;
+        notifyDataSetChanged();
     }
 
     @Override
