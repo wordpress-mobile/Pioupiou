@@ -249,8 +249,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onPostChanged(PostStore.OnPostChanged event) {
-        if (event.causeOfChange == PostAction.FETCH_POSTS
-                || event.causeOfChange == PostAction.FETCHED_POSTS) {
+        if (event.causeOfChange == PostAction.FETCH_POSTS) {
             mIsFetchingPosts = false;
         }
 
