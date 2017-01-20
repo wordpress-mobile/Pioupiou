@@ -34,7 +34,7 @@
         tools:text="ponyman" />
 
     <Button
-        android:id="@+id/login_button"
+        android:id="@+id/login_button_2fa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"

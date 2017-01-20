@@ -84,6 +84,9 @@ public class LoginActivity extends Activity {
         mUrlView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (keyEvent.getAction() != KeyEvent.ACTION_DOWN)
+                    return false;
+
                 if (id == R.id.checkUrl || id == EditorInfo.IME_NULL) {
                     checkURLField();
                     return true;
@@ -92,7 +95,7 @@ public class LoginActivity extends Activity {
             }
         });
 
-        mNextButton = (Button) view.findViewById(R.id.login_button);
+        mNextButton = (Button) view.findViewById(R.id.next_button);
         mNextButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -107,6 +110,9 @@ public class LoginActivity extends Activity {
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (keyEvent.getAction() != KeyEvent.ACTION_DOWN)
+                    return false;
+
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
                     attemptLogin();
                     return true;
@@ -129,6 +135,9 @@ public class LoginActivity extends Activity {
         mAuthCodeView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (keyEvent.getAction() != KeyEvent.ACTION_DOWN)
+                    return false;
+
                 if (id == R.id.checkTwoFactorCode || id == EditorInfo.IME_NULL) {
                     attempt2FALogin();
                     return true;
@@ -137,7 +146,7 @@ public class LoginActivity extends Activity {
             }
         });
 
-        mLogInWithCodeButton = (Button) view.findViewById(R.id.login_button);
+        mLogInWithCodeButton = (Button) view.findViewById(R.id.login_button_2fa);
         mLogInWithCodeButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
