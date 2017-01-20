@@ -29,6 +29,9 @@ import org.wordpress.android.fluxc.model.PostModel;
 import org.wordpress.android.fluxc.model.SiteModel;
 import org.wordpress.android.fluxc.store.AccountStore;
 import org.wordpress.android.fluxc.store.PostStore;
+import org.wordpress.android.fluxc.store.PostStore.OnPostChanged;
+import org.wordpress.android.fluxc.store.PostStore.OnPostInstantiated;
+import org.wordpress.android.fluxc.store.PostStore.OnPostUploaded;
 import org.wordpress.android.fluxc.store.SiteStore;
 import org.wordpress.android.util.ToastUtils;
 import org.wordpress.persistentedittext.PersistentEditText;
@@ -248,7 +251,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
      */
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onPostChanged(PostStore.OnPostChanged event) {
+    public void onPostChanged(OnPostChanged event) {
         if (event.causeOfChange == PostAction.FETCH_POSTS) {
             mIsFetchingPosts = false;
         }
@@ -270,7 +273,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
      */
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onPostInstantiated(PostStore.OnPostInstantiated event) {
+    public void onPostInstantiated(OnPostInstantiated event) {
         if (!event.isError()) {
             showProgress(true);
             PostModel post = event.post;
@@ -287,7 +290,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
      */
     @SuppressWarnings("unused")
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onPostUploaded(PostStore.OnPostUploaded event) {
+    public void onPostUploaded(OnPostUploaded event) {
         showProgress(false);
         if (!event.isError()) {
             showPosts(getSite());
