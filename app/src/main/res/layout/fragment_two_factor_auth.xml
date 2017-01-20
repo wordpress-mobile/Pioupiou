@@ -15,29 +15,31 @@
         android:layout_marginBottom="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:text="@string/login_help_url" />
+        android:text="@string/login_help_2fa" />
 
     <org.wordpress.persistentedittext.PersistentEditText
-        android:id="@+id/url"
+        android:id="@+id/two_factor_code"
         style="@style/WordPress.NuxEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:background="@color/white"
-        android:hint="@string/prompt_url"
-        android:imeActionId="@+id/checkUrl"
-        android:imeOptions="actionGo"
-        android:inputType="textUri"
+        android:hint="@string/prompt_code"
+        android:imeActionId="@+id/checkTwoFactorCode"
+        android:imeActionLabel="@string/action_login"
+        android:imeOptions="actionUnspecified"
+        android:inputType="number"
         android:maxLines="1"
-        app:persistenceEnabled="true" />
+        android:maxLength="6"
+        app:persistenceEnabled="false"
+        tools:text="ponyman" />
 
     <Button
-        android:id="@+id/next_button"
+        android:id="@+id/login_button_2fa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/action_next"
+        android:text="@string/action_login"
         android:textStyle="bold" />
 
 </LinearLayout>
