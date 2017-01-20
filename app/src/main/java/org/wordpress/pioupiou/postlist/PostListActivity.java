@@ -103,8 +103,8 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
 
     private void showPosts(@NonNull SiteModel site) {
         Timber.i("Show posts started");
-        if (hasPostFragment()) {
-            getPostFragment().setPosts(mAccountStore.getAccount(), mPostStore.getPostsForSite(site));
+        if (hasPostListFragment()) {
+            getPostListFragment().setPosts(mAccountStore.getAccount(), mPostStore.getPostsForSite(site));
         }
     }
 
@@ -221,11 +221,11 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         mDispatcher.dispatch(PostActionBuilder.newInstantiatePostAction(payload));
     }
 
-    private boolean hasPostFragment() {
-        return getPostFragment() != null;
+    private boolean hasPostListFragment() {
+        return getPostListFragment() != null;
     }
 
-    private PostListFragment getPostFragment() {
+    private PostListFragment getPostListFragment() {
         Fragment fragment = getFragmentManager().findFragmentById(R.id.list);
         if (fragment instanceof PostListFragment) {
             return (PostListFragment) fragment;
