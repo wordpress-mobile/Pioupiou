@@ -22,6 +22,7 @@ import org.wordpress.android.fluxc.generated.AccountActionBuilder;
 import org.wordpress.android.fluxc.generated.AuthenticationActionBuilder;
 import org.wordpress.android.fluxc.generated.SiteActionBuilder;
 import org.wordpress.android.fluxc.store.AccountStore;
+import org.wordpress.android.fluxc.store.AccountStore.AuthenticationErrorType;
 import org.wordpress.android.fluxc.store.AccountStore.OnDiscoveryResponse;
 import org.wordpress.android.fluxc.store.AccountStore.AuthenticatePayload;
 import org.wordpress.android.fluxc.store.AccountStore.OnAuthenticationChanged;
@@ -35,8 +36,6 @@ import org.wordpress.pioupiou.postlist.PostListActivity;
 import javax.inject.Inject;
 
 import timber.log.Timber;
-
-import static org.wordpress.android.fluxc.store.AccountStore.AuthenticationErrorType.NEEDS_2FA;
 
 public class LoginActivity extends Activity {
     // UI references
@@ -274,7 +273,7 @@ public class LoginActivity extends Activity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onAuthenticationChanged(OnAuthenticationChanged event) {
         if (event.isError()) {
-            if (event.error.type == NEEDS_2FA) {
+            if (event.error.type == AuthenticationErrorType.NEEDS_2FA) {
                 Timber.i("onAuthenticationChanged error needs 2FA code");
                 set2FAFieldsVisible(true);
             } else {
