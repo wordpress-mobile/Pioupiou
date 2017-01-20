@@ -262,10 +262,11 @@ public class LoginActivity extends Activity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onAuthenticationChanged(OnAuthenticationChanged event) {
         if (event.isError()) {
-            Timber.i("onAuthenticationChanged error");
             if (event.error.type == NEEDS_2FA) {
+                Timber.i("onAuthenticationChanged error needs 2FA code");
                 set2FAFieldsVisible(true);
             } else {
+                Timber.i("onAuthenticationChanged error " + event.error.message);
                 Toast.makeText(this, event.error.message, Toast.LENGTH_SHORT).show();
             }
         } else {
