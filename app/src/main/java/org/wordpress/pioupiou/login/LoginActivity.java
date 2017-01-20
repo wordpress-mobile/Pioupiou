@@ -84,8 +84,9 @@ public class LoginActivity extends Activity {
         mUrlView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (keyEvent.getAction() != KeyEvent.ACTION_DOWN)
+                if (keyEvent.getAction() != KeyEvent.ACTION_DOWN) {
                     return false;
+                }
 
                 if (id == R.id.checkUrl || id == EditorInfo.IME_NULL) {
                     checkURLField();
@@ -110,8 +111,9 @@ public class LoginActivity extends Activity {
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (keyEvent.getAction() != KeyEvent.ACTION_DOWN)
+                if (keyEvent.getAction() != KeyEvent.ACTION_DOWN) {
                     return false;
+                }
 
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
                     attemptLogin();
@@ -135,8 +137,9 @@ public class LoginActivity extends Activity {
         mAuthCodeView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (keyEvent.getAction() != KeyEvent.ACTION_DOWN)
+                if (keyEvent.getAction() != KeyEvent.ACTION_DOWN) {
                     return false;
+                }
 
                 if (id == R.id.checkTwoFactorCode || id == EditorInfo.IME_NULL) {
                     attempt2FALogin();
