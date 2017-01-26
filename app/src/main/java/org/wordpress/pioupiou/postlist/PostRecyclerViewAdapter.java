@@ -1,6 +1,10 @@
 package org.wordpress.pioupiou.postlist;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,69 +13,154 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
+import org.wordpress.android.fluxc.model.AccountModel;
+import org.wordpress.android.fluxc.model.PostModel;
+import org.wordpress.android.util.DateTimeUtils;
+import org.wordpress.android.util.HtmlUtils;
+import org.wordpress.android.util.ImageUtils;
 import org.wordpress.pioupiou.R;
-import org.wordpress.pioupiou.postlist.DummyContent.PostItem;
-import org.wordpress.pioupiou.postlist.PostFragment.OnListFragmentInteractionListener;
+import org.wordpress.pioupiou.postlist.PostListFragment.OnListFragmentInteractionListener;
 
+import java.text.BreakIterator;
+import java.util.Date;
 import java.util.List;
 
 public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerViewAdapter.ViewHolder> {
-    private final List<PostItem> mValues; // Use a List<PostModel> instead
     private final OnListFragmentInteractionListener mListener;
+    private final LayoutInflater mInflater;
+    private final int mAvatarSz;
+    private AccountModel mAccount;
+    private List<PostModel> mPosts;
 
-    public PostRecyclerViewAdapter(List<PostItem> items, OnListFragmentInteractionListener listener) {
-        mValues = items;
+    public PostRecyclerViewAdapter(Context context,
+                                   OnListFragmentInteractionListener listener) {
+        mInflater = LayoutInflater.from(context);
         mListener = listener;
+        mAvatarSz = context.getResources().getDimensionPixelSize(R.dimen.post_avatar);
+    }
+
+    public void setPosts(@NonNull AccountModel account, @NonNull List<PostModel> posts) {
+        mAccount = account;
+        mPosts = posts;
+        notifyDataSetChanged();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_post, parent, false);
+        View view = mInflater.inflate(R.layout.post_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        PostItem item = mValues.get(position);
-        holder.mItem = item;
-        holder.mIdView.setText(item.authorName);
-        holder.mContentView.setText(item.message);
-        holder.mDateView.setText(DateUtils.getRelativeTimeSpanString(item.date, System.currentTimeMillis(),
-                DateUtils.SECOND_IN_MILLIS, DateUtils.FORMAT_ABBREV_ALL));
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
-        Picasso.with(holder.mView.getContext()).load(item.gravatarUrl).placeholder(R.mipmap.ic_egg)
-                .into(holder.mImageView);
+        PostModel post = mPosts.get(position);
+
+        // TODO: we get the author from the account but it should be part of the post model
+        holder.mAuthorView.setText(mAccount.getDisplayName());
+        holder.mContentView.setText(makeExcerpt(post.getContent()));
+
+        if (post.getDateCreated() != null) {
+            Date date = DateTimeUtils.dateFromIso8601(post.getDateCreated());
+            holder.mDateView.setText(DateUtils.getRelativeTimeSpanString(
+                    date.getTime(),
+                    System.currentTimeMillis(),
+                    DateUtils.SECOND_IN_MILLIS,
+                    DateUtils.FORMAT_ABBREV_ALL));
+        } else {
+            holder.mDateView.setText("unknown");
+        }
+
+        Picasso.with(holder.itemView.getContext())
+                .load(mAccount.getAvatarUrl())
+                .placeholder(R.mipmap.ic_egg)
+                .transform(mTransformation)
+                .resize(mAvatarSz, mAvatarSz)
+                .into(holder.mAvatarView);
     }
+
+    private final Transformation mTransformation = new Transformation() {
+        @Override
+        public Bitmap transform(Bitmap source) {
+            Bitmap circular = ImageUtils.getCircularBitmap(source);
+            source.recycle();
+            return circular;
+        }
+        @Override
+        public String key() {
+            return "circular-avatar";
+        }
+    };
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return mPosts.size();
+    }
+
+    /*
+     * return an excerpt from the full post content - breaks at words rather than at a specific
+     * character position
+     */
+    private static final int MAX_EXCERPT_LEN = 200;
+    private static String makeExcerpt(final String content) {
+        if (TextUtils.isEmpty(content)) {
+            return null;
+        }
+
+        String text = HtmlUtils.fastStripHtml(content);
+        if (text.length() <= MAX_EXCERPT_LEN) {
+            return text.trim();
+        }
+
+        StringBuilder result = new StringBuilder();
+        BreakIterator wordIterator = BreakIterator.getWordInstance();
+        wordIterator.setText(text);
+        int start = wordIterator.first();
+        int end = wordIterator.next();
+        int totalLen = 0;
+        while (end != BreakIterator.DONE) {
+            String word = text.substring(start, end);
+            result.append(word);
+            totalLen += word.length();
+            if (totalLen >= MAX_EXCERPT_LEN) {
+                break;
+            }
+            start = end;
+            end = wordIterator.next();
+        }
+
+        if (totalLen == 0) {
+            return null;
+        }
+
+        return result.toString().trim() + "…";
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final ImageView mImageView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public final TextView mDateView;
-        public PostItem mItem;
+        private final ImageView mAvatarView;
+        private final TextView mAuthorView;
+        private final TextView mContentView;
+        private final TextView mDateView;
 
         public ViewHolder(View view) {
             super(view);
-            mView = view;
-            mIdView = (TextView) view.findViewById(R.id.author);
+
+            mAuthorView = (TextView) view.findViewById(R.id.author);
             mContentView = (TextView) view.findViewById(R.id.message);
-            mImageView = (ImageView) view.findViewById(R.id.gravatar_view);
+            mAvatarView = (ImageView) view.findViewById(R.id.gravatar_view);
             mDateView = (TextView) view.findViewById(R.id.date);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mListener != null) {
+                        int position = getAdapterPosition();
+                        PostModel post = mPosts.get(position);
+                        mListener.onListFragmentInteraction(post);
+                    }
+                }
+            });
         }
 
         @Override

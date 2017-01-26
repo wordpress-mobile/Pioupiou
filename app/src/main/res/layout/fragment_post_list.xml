@@ -9,5 +9,5 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layoutManager="LinearLayoutManager"
-    tools:context="org.wordpress.pioupiou.postlist.PostFragment"
-    tools:listitem="@layout/fragment_post" />
+    tools:context="org.wordpress.pioupiou.postlist.PostListFragment"
+    tools:listitem="@layout/post_item" />

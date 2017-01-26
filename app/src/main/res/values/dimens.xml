@@ -4,4 +4,5 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="tooltip_padding">8dp</dimen>
+    <dimen name="post_avatar">48dp</dimen>
 </resources>

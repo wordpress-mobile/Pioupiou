@@ -3,6 +3,7 @@ package org.wordpress.pioupiou.postlist;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,8 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.wordpress.android.fluxc.model.AccountModel;
+import org.wordpress.android.fluxc.model.PostModel;
 import org.wordpress.pioupiou.R;
-import org.wordpress.pioupiou.postlist.DummyContent.PostItem;
+
+import java.util.List;
 
 /**
  * A fragment representing a list of Items.
@@ -19,21 +23,23 @@ import org.wordpress.pioupiou.postlist.DummyContent.PostItem;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class PostFragment extends Fragment {
+public class PostListFragment extends Fragment {
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+    private RecyclerView mRecyclerView;
+    private PostRecyclerViewAdapter mAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public PostFragment() {
+    public PostListFragment() {
     }
 
     @SuppressWarnings("unused")
-    public static PostFragment newInstance(int columnCount) {
-        PostFragment fragment = new PostFragment();
+    public static PostListFragment newInstance(int columnCount) {
+        PostListFragment fragment = new PostListFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -53,19 +59,21 @@ public class PostFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_post_list, container, false);
-
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            recyclerView.setAdapter(new PostRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.list);
+        if (mColumnCount <= 1) {
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        } else {
+            mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), mColumnCount));
         }
+
+        mAdapter = new PostRecyclerViewAdapter(getActivity(), mListener);
+        mRecyclerView.setAdapter(mAdapter);
+
         return view;
+    }
+
+    void setPosts(@NonNull AccountModel account, @NonNull List<PostModel> posts) {
+        mAdapter.setPosts(account, posts);
     }
 
     @Override
@@ -86,7 +94,6 @@ public class PostFragment extends Fragment {
     }
 
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onListFragmentInteraction(PostItem item);
+        void onListFragmentInteraction(PostModel item);
     }
 }

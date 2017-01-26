@@ -1,2 +1,3 @@
 wp.OAUTH.APP.ID = wp
 wp.OAUTH.APP.SECRET = wp
+wp.SITE_DOMAIN = [the domain of the site to use when displaying posts, ex: ponyexpress.wordpress.com]
