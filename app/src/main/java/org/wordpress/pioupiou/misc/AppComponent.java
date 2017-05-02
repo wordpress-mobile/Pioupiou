@@ -3,6 +3,7 @@ package org.wordpress.pioupiou.misc;
 import org.wordpress.android.fluxc.module.AppContextModule;
 import org.wordpress.android.fluxc.module.ReleaseBaseModule;
 import org.wordpress.android.fluxc.module.ReleaseNetworkModule;
+import org.wordpress.android.fluxc.module.ReleaseOkHttpClientModule;
 import org.wordpress.android.fluxc.module.ReleaseStoreModule;
 import org.wordpress.pioupiou.login.LoginActivity;
 import org.wordpress.pioupiou.postlist.PostListActivity;
@@ -17,6 +18,7 @@ import dagger.Component;
         AppSecretsModule.class,
         ReleaseBaseModule.class,
         ReleaseNetworkModule.class,
+        ReleaseOkHttpClientModule.class,
         ReleaseStoreModule.class
 })
 public interface AppComponent {
