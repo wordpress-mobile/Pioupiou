@@ -24,6 +24,7 @@ import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.postlist.PostListFragment.OnListFragmentInteractionListener;
 
 import java.text.BreakIterator;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
     private final LayoutInflater mInflater;
     private final int mAvatarSz;
     private AccountModel mAccount;
-    private List<PostModel> mPosts;
+    private List<PostModel> mPosts = new ArrayList<>();
 
     public PostRecyclerViewAdapter(Context context,
                                    OnListFragmentInteractionListener listener) {
