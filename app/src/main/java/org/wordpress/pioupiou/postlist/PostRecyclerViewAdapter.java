@@ -62,7 +62,7 @@ public class PostRecyclerViewAdapter extends RecyclerView.Adapter<PostRecyclerVi
         holder.mAuthorView.setText(mAccount.getDisplayName());
         holder.mContentView.setText(makeExcerpt(post.getContent()));
 
-        if (post.getDateCreated() != null) {
+        if (!post.getDateCreated().isEmpty()) {
             Date date = DateTimeUtils.dateFromIso8601(post.getDateCreated());
             holder.mDateView.setText(DateUtils.getRelativeTimeSpanString(
                     date.getTime(),
