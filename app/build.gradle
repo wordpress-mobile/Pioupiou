@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion "25.0.3"
     defaultConfig {
         applicationId "org.wordpress.pioupiou"
         minSdkVersion 15
@@ -34,14 +34,14 @@ android.buildTypes.all { buildType ->
 }
 
 dependencies {
-    compile ('com.github.wordpress-mobile.WordPress-FluxC-Android:fluxc:issue~check-wpcom-url-host-SNAPSHOT') {
+    compile ('com.github.wordpress-mobile.WordPress-FluxC-Android:fluxc:091f1c54ae8553f9e9f4b4b46981c76e3cf802fe') {
         exclude group : 'com.android.support'
     }
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.android.support:design:25.1.0'
-    compile 'com.android.support:support-v4:25.1.0'
-    compile 'com.android.support:recyclerview-v7:25.1.0'
-    compile 'com.android.support:cardview-v7:25.1.0'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:support-v4:25.3.1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
+    compile 'com.android.support:cardview-v7:25.3.1'
     compile 'com.google.dagger:dagger:2.0.2'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.jakewharton.timber:timber:3.1.0'

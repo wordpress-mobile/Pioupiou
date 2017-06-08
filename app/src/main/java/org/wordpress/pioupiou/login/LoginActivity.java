@@ -22,13 +22,14 @@ import org.wordpress.android.fluxc.generated.AccountActionBuilder;
 import org.wordpress.android.fluxc.generated.AuthenticationActionBuilder;
 import org.wordpress.android.fluxc.generated.SiteActionBuilder;
 import org.wordpress.android.fluxc.store.AccountStore;
-import org.wordpress.android.fluxc.store.AccountStore.AuthenticationErrorType;
-import org.wordpress.android.fluxc.store.AccountStore.OnDiscoveryResponse;
 import org.wordpress.android.fluxc.store.AccountStore.AuthenticatePayload;
+import org.wordpress.android.fluxc.store.AccountStore.AuthenticationErrorType;
 import org.wordpress.android.fluxc.store.AccountStore.OnAuthenticationChanged;
+import org.wordpress.android.fluxc.store.AccountStore.OnDiscoveryResponse;
 import org.wordpress.android.fluxc.store.SiteStore;
 import org.wordpress.android.fluxc.store.SiteStore.OnSiteChanged;
 import org.wordpress.android.fluxc.store.SiteStore.OnURLChecked;
+import org.wordpress.android.fluxc.store.SiteStore.RefreshSitesXMLRPCPayload;
 import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.misc.PioupiouApp;
 import org.wordpress.pioupiou.postlist.PostListActivity;
@@ -67,7 +68,7 @@ public class LoginActivity extends Activity {
         ((PioupiouApp) getApplication()).component().inject(this);
 
         // If the user has an access token or a self hosted site, we consider they're logged in.
-        if (mAccountStore.hasAccessToken() || mSiteStore.hasSelfHostedSite()) {
+        if (mAccountStore.hasAccessToken() || mSiteStore.hasSiteAccessedViaXMLRPC()) {
             showPostListAndFinish();
         }
 
@@ -183,11 +184,7 @@ public class LoginActivity extends Activity {
 
             // trigger the discovery process here (if not mUrlIsWPCom, we want to make sure it's a self hosted
             // site and not a random site.)
-            SiteStore.RefreshSitesXMLRPCPayload payload = new SiteStore.RefreshSitesXMLRPCPayload();
-            payload.url = mUrl;
-            payload.username = mEmailView.getText().toString();
-            payload.password = mPasswordView.getText().toString();
-            mDispatcher.dispatch(AuthenticationActionBuilder.newDiscoverEndpointAction(payload));
+            mDispatcher.dispatch(AuthenticationActionBuilder.newDiscoverEndpointAction(mUrl));
         }
     }
 
@@ -308,8 +305,7 @@ public class LoginActivity extends Activity {
 
             if (!TextUtils.isEmpty(mXMLRPCUrl)) {
                 // now check sites
-                SiteStore.RefreshSitesXMLRPCPayload refreshSitesXMLRPCPayload =
-                        new SiteStore.RefreshSitesXMLRPCPayload();
+                RefreshSitesXMLRPCPayload refreshSitesXMLRPCPayload = new RefreshSitesXMLRPCPayload();
                 refreshSitesXMLRPCPayload.username = mEmailView.getText().toString();
                 refreshSitesXMLRPCPayload.password = mPasswordView.getText().toString();
                 refreshSitesXMLRPCPayload.url = mXMLRPCUrl;

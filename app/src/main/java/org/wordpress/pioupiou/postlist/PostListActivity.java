@@ -30,8 +30,8 @@ import org.wordpress.android.fluxc.model.SiteModel;
 import org.wordpress.android.fluxc.store.AccountStore;
 import org.wordpress.android.fluxc.store.PostStore;
 import org.wordpress.android.fluxc.store.PostStore.OnPostChanged;
-import org.wordpress.android.fluxc.store.PostStore.OnPostInstantiated;
 import org.wordpress.android.fluxc.store.PostStore.OnPostUploaded;
+import org.wordpress.android.fluxc.store.PostStore.RemotePostPayload;
 import org.wordpress.android.fluxc.store.SiteStore;
 import org.wordpress.android.util.ToastUtils;
 import org.wordpress.persistentedittext.PersistentEditText;
@@ -219,9 +219,12 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
             return;
         }
 
-        // instantiate a new post, event handler will take care of setting the content and uploading it
-        PostStore.InstantiatePostPayload payload = new PostStore.InstantiatePostPayload(getSite(), false);
-        mDispatcher.dispatch(PostActionBuilder.newInstantiatePostAction(payload));
+        // instantiate a new post with the content and publish it
+        showProgress(true);
+        PostModel post = mPostStore.instantiatePostModel(getSite(), false);
+        post.setContent(mNewPostContent);
+        RemotePostPayload payload = new RemotePostPayload(post, getSite());
+        mDispatcher.dispatch(PostActionBuilder.newPushPostAction(payload));
     }
 
     private boolean hasPostListFragment() {
@@ -265,24 +268,6 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         }
 
         mSwipeRefreshLayout.setRefreshing(false);
-    }
-
-    /*
-     * called when a new post has been instantiated - we use this to set the new post's content
-     * and actually publish it
-     */
-    @SuppressWarnings("unused")
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onPostInstantiated(OnPostInstantiated event) {
-        if (!event.isError()) {
-            showProgress(true);
-            PostModel post = event.post;
-            post.setContent(mNewPostContent);
-            PostStore.RemotePostPayload payload = new PostStore.RemotePostPayload(post, getSite());
-            mDispatcher.dispatch(PostActionBuilder.newPushPostAction(payload));
-        } else {
-            showError("onPostInstantiated error - " + event.error.message);
-        }
     }
 
     /*
