@@ -16,6 +16,7 @@ import dagger.Component;
 @Component(modules = {
         AppContextModule.class,
         AppSecretsModule.class,
+        ReleaseOkHttpClientModule.class,
         ReleaseBaseModule.class,
         ReleaseNetworkModule.class,
         ReleaseOkHttpClientModule.class,

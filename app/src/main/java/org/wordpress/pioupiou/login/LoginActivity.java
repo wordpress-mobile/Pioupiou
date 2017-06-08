@@ -68,7 +68,7 @@ public class LoginActivity extends Activity {
         ((PioupiouApp) getApplication()).component().inject(this);
 
         // If the user has an access token or a self hosted site, we consider they're logged in.
-        if (mAccountStore.hasAccessToken() || mSiteStore.hasSelfHostedSite()) {
+        if (mAccountStore.hasAccessToken() || mSiteStore.hasSiteAccessedViaXMLRPC()) {
             showPostListAndFinish();
         }
 
