@@ -34,6 +34,7 @@ import org.wordpress.android.fluxc.store.PostStore.OnPostUploaded;
 import org.wordpress.android.fluxc.store.PostStore.RemotePostPayload;
 import org.wordpress.android.fluxc.store.SiteStore;
 import org.wordpress.android.util.ToastUtils;
+import org.wordpress.android.util.UrlUtils;
 import org.wordpress.persistentedittext.PersistentEditText;
 import org.wordpress.pioupiou.BuildConfig;
 import org.wordpress.pioupiou.R;
@@ -123,7 +124,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
      * returns the site to use for the post list - relies on wp.SITE_DOMAIN in app/build.gradle
      */
     private SiteModel getSite() {
-        List<SiteModel> sites = mSiteStore.getSitesByNameOrUrlMatching(BuildConfig.SITE_DOMAIN);
+        List<SiteModel> sites = mSiteStore.getSitesByNameOrUrlMatching(UrlUtils.removeScheme(BuildConfig.SITE_DOMAIN));
         if (sites.size() != 0) {
             return sites.get(0);
         } else {
