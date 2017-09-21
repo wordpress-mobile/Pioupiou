@@ -34,7 +34,7 @@ android.buildTypes.all { buildType ->
 }
 
 dependencies {
-    compile ('com.github.wordpress-mobile.WordPress-FluxC-Android:fluxc:091f1c54ae8553f9e9f4b4b46981c76e3cf802fe') {
+    compile ('com.github.wordpress-mobile.WordPress-FluxC-Android:fluxc:d91145d2206817c87e67a473304085a7ef3feb79') {
         exclude group : 'com.android.support'
     }
     compile 'com.android.support:appcompat-v7:25.3.1'
