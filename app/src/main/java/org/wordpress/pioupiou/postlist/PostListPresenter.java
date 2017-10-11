@@ -76,7 +76,7 @@ public class PostListPresenter implements PostListContract.Presenter {
         mDispatcher.dispatch(PostActionBuilder.newPushPostAction(payload));
     }
 
-    private SiteModel getSite() {
+    protected SiteModel getSite() {
         List<SiteModel> sites = mSiteStore.getSitesByNameOrUrlMatching(UrlUtils.removeScheme(BuildConfig.SITE_DOMAIN));
         if (sites.size() != 0) {
             return sites.get(0);

@@ -49,4 +49,9 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.0.2'
     provided 'org.glassfish:javax.annotation:10.0-b28'
     compile 'com.fenchtose:tooltip:0.1.5'
+
+    // Dependencies for local unit tests
+    testCompile "junit:junit:4.12"
+    testCompile "org.mockito:mockito-all:1.10.19"
+    testCompile "org.hamcrest:hamcrest-all:1.3"
 }
