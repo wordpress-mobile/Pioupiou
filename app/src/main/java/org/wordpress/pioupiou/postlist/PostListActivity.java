@@ -20,23 +20,10 @@ import android.widget.ImageView;
 import com.fenchtose.tooltip.Tooltip;
 import com.fenchtose.tooltip.Tooltip.Listener;
 
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-import org.wordpress.android.fluxc.Dispatcher;
-import org.wordpress.android.fluxc.action.PostAction;
-import org.wordpress.android.fluxc.generated.PostActionBuilder;
+import org.wordpress.android.fluxc.model.AccountModel;
 import org.wordpress.android.fluxc.model.PostModel;
-import org.wordpress.android.fluxc.model.SiteModel;
-import org.wordpress.android.fluxc.store.AccountStore;
-import org.wordpress.android.fluxc.store.PostStore;
-import org.wordpress.android.fluxc.store.PostStore.OnPostChanged;
-import org.wordpress.android.fluxc.store.PostStore.OnPostUploaded;
-import org.wordpress.android.fluxc.store.PostStore.RemotePostPayload;
-import org.wordpress.android.fluxc.store.SiteStore;
 import org.wordpress.android.util.ToastUtils;
-import org.wordpress.android.util.UrlUtils;
 import org.wordpress.persistentedittext.PersistentEditText;
-import org.wordpress.pioupiou.BuildConfig;
 import org.wordpress.pioupiou.R;
 import org.wordpress.pioupiou.misc.PioupiouApp;
 import org.wordpress.pioupiou.postlist.PostListFragment.OnListFragmentInteractionListener;
@@ -47,21 +34,17 @@ import javax.inject.Inject;
 
 import timber.log.Timber;
 
-public class PostListActivity extends AppCompatActivity implements OnListFragmentInteractionListener {
+public class PostListActivity extends AppCompatActivity implements OnListFragmentInteractionListener,
+        PostListContract.View {
     // UI references
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     // State
     private boolean mNewPostVisible;
-    private boolean mIsFetchingPosts;
 
     private String mNewPostContent;
 
-    // FluxC
-    @Inject Dispatcher mDispatcher;
-    @Inject PostStore mPostStore;
-    @Inject SiteStore mSiteStore;
-    @Inject AccountStore mAccountStore;
+    @Inject PostListContract.Presenter mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,60 +58,30 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        if (!mIsFetchingPosts) {
-                            fetchPosts(getSite());
-                        }
+                        mPresenter.fetchPosts();
                     }
                 }
         );
 
-        // immediately show existing posts then fetch the latest from the server
-        SiteModel site = getSite();
-        if (site == null) {
-            Timber.w("Can't show posts for null site");
-            showError("No site found");
-        } else {
-            showPosts(site);
-            fetchPosts(site);
-        }
+        mPresenter.takeView(this);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        mDispatcher.register(this);
+    public void onDestroy() {
+        super.onDestroy();
+        mPresenter.dropView();
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        mDispatcher.unregister(this);
+    public void setLoadingIndicator(boolean active) {
+        mSwipeRefreshLayout.setEnabled(active);
     }
 
-    private void showPosts(@NonNull SiteModel site) {
+    @Override
+    public void showPosts(AccountModel account, @NonNull List<PostModel> posts) {
         Timber.i("Show posts started");
         if (hasPostListFragment()) {
-            getPostListFragment().setPosts(mAccountStore.getAccount(), mPostStore.getPostsForSite(site));
-        }
-    }
-
-    private void fetchPosts(@NonNull SiteModel site) {
-        Timber.i("Fetch posts started");
-        mIsFetchingPosts = true;
-        mDispatcher.dispatch(PostActionBuilder.newFetchPostsAction(
-                new PostStore.FetchPostsPayload(site)));
-        mSwipeRefreshLayout.setRefreshing(true);
-    }
-
-    /*
-     * returns the site to use for the post list - relies on wp.SITE_DOMAIN in app/build.gradle
-     */
-    private SiteModel getSite() {
-        List<SiteModel> sites = mSiteStore.getSitesByNameOrUrlMatching(UrlUtils.removeScheme(BuildConfig.SITE_DOMAIN));
-        if (sites.size() != 0) {
-            return sites.get(0);
-        } else {
-            return null;
+            getPostListFragment().setPosts(account, posts);
         }
     }
 
@@ -220,12 +173,7 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
             return;
         }
 
-        // instantiate a new post with the content and publish it
-        showProgress(true);
-        PostModel post = mPostStore.instantiatePostModel(getSite(), false);
-        post.setContent(mNewPostContent);
-        RemotePostPayload payload = new RemotePostPayload(post, getSite());
-        mDispatcher.dispatch(PostActionBuilder.newPushPostAction(payload));
+        mPresenter.publishPost(mNewPostContent);
     }
 
     private boolean hasPostListFragment() {
@@ -241,47 +189,14 @@ public class PostListActivity extends AppCompatActivity implements OnListFragmen
         }
     }
 
-    private void showProgress(boolean show) {
+    @Override
+    public void showProgress(boolean show) {
         View progress = findViewById(R.id.progress);
         progress.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-    private void showError(String message) {
+    @Override
+    public void showError(String message) {
         ToastUtils.showToast(this, message, ToastUtils.Duration.LONG);
-    }
-
-    /*
-     * called whenever the post list changes, such as when a fetch posts has completed
-     */
-    @SuppressWarnings("unused")
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onPostChanged(OnPostChanged event) {
-        if (event.causeOfChange == PostAction.FETCH_POSTS) {
-            mIsFetchingPosts = false;
-        }
-
-        if (!event.isError()) {
-            showPosts(getSite());
-        } else {
-            showError("OnPostChanged error - "
-                    + event.error.message
-                    + " (" + event.causeOfChange.toString() + ")");
-        }
-
-        mSwipeRefreshLayout.setRefreshing(false);
-    }
-
-    /*
-     * called when a new post has been uploaded
-     */
-    @SuppressWarnings("unused")
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onPostUploaded(OnPostUploaded event) {
-        showProgress(false);
-        if (!event.isError()) {
-            showPosts(getSite());
-        } else {
-            showError("OnPostUploaded error - " + event.error.message);
-        }
     }
 }

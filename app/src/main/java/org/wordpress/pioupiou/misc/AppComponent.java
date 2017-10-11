@@ -7,6 +7,8 @@ import org.wordpress.android.fluxc.module.ReleaseOkHttpClientModule;
 import org.wordpress.android.fluxc.module.ReleaseStoreModule;
 import org.wordpress.pioupiou.login.LoginActivity;
 import org.wordpress.pioupiou.postlist.PostListActivity;
+import org.wordpress.pioupiou.postlist.PostListContract;
+import org.wordpress.pioupiou.postlist.PostListModule;
 
 import javax.inject.Singleton;
 
@@ -20,11 +22,14 @@ import dagger.Component;
         ReleaseBaseModule.class,
         ReleaseNetworkModule.class,
         ReleaseOkHttpClientModule.class,
-        ReleaseStoreModule.class
+        ReleaseStoreModule.class,
+        PostListModule.class
 })
 public interface AppComponent {
     void inject(PioupiouApp object);
     void inject(LoginActivity object);
     void inject(PostListActivity object);
+
+    void inject(PostListContract.Presenter object);
 }
 
